@@ -47,10 +47,10 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
       {dragControls && (
         <div
           onPointerDown={(e) => dragControls.start(e)}
-          className="shrink-0 p-1 cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 dark:text-gray-600 dark:hover:text-gray-300 transition-colors touch-none -ml-1"
+          className="shrink-0 p-1 cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 dark:text-gray-600 dark:hover:text-gray-300 opacity-40 hover:opacity-100 transition-opacity touch-none -ml-1"
           title="Drag handle to reorder priority"
         >
-          <GripVertical className="w-5 h-5" />
+          <GripVertical className="w-4 h-4" />
         </div>
       )}
 

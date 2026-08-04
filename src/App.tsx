@@ -12,12 +12,27 @@ import { MilestoneBadges } from './components/MilestoneBadges';
 import { WeeklySummary } from './components/WeeklySummary';
 import { MonthlyHeatmap } from './components/MonthlyHeatmap';
 import { HistoricalLogModal } from './components/HistoricalLogModal';
-import { Habit, CompletionRecord, SortOption } from './types';
-import { Plus, Settings, Sparkles, Filter, CheckCircle2, BarChart3, Flame, Target, TrendingUp, Sun, Moon, Calendar as CalendarIcon, History, GripVertical } from 'lucide-react';
+import { DailyMotivation } from './components/DailyMotivation';
+import { Habit, CompletionRecord } from './types';
+import { Plus, Settings, Sparkles, CheckCircle2, BarChart3, Flame, Target, TrendingUp, Sun, Moon, GripVertical, Eye, EyeOff, SlidersHorizontal, ArrowUp, ArrowDown, RotateCcw, Check } from 'lucide-react';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'motion/react';
 import { format } from 'date-fns';
 
 type ViewMode = 'tasks' | 'summaries';
+
+interface SummarySectionConfig {
+  id: string;
+  name: string;
+  visible: boolean;
+}
+
+const DEFAULT_SUMMARY_SECTIONS: SummarySectionConfig[] = [
+  { id: 'metrics', name: 'Key Metrics Overview', visible: true },
+  { id: 'monthly_heatmap', name: 'Monthly Activity Overview', visible: true },
+  { id: 'weekly_summary', name: 'Weekly Progress Bar', visible: true },
+  { id: 'weekly_heatmap', name: 'Weekly Heatmap Grid', visible: true },
+  { id: 'milestones', name: 'Milestone Badges', visible: true },
+];
 
 function HabitListItem({
   habit,
@@ -63,7 +78,41 @@ export default function App() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined);
-  const [sortBy, setSortBy] = useState<SortOption>('manual');
+  
+  // Customizable Summaries Layout State
+  const [summarySections, setSummarySections] = useState<SummarySectionConfig[]>(() => {
+    try {
+      const saved = localStorage.getItem('summaries_layout_config');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return DEFAULT_SUMMARY_SECTIONS;
+  });
+  const [isEditingLayout, setIsEditingLayout] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('summaries_layout_config', JSON.stringify(summarySections));
+  }, [summarySections]);
+
+  const toggleSectionVisibility = (id: string) => {
+    setSummarySections(prev => prev.map(sec => sec.id === id ? { ...sec, visible: !sec.visible } : sec));
+  };
+
+  const moveSection = (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= summarySections.length) return;
+    const updated = [...summarySections];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(newIndex, 0, moved);
+    setSummarySections(updated);
+  };
+
+  const resetSummaryLayout = () => {
+    setSummarySections(DEFAULT_SUMMARY_SECTIONS);
+  };
+
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem('theme');
     if (saved === 'dark' || saved === 'light') return saved;
@@ -159,23 +208,90 @@ export default function App() {
     return Math.max(...data.habits.map(h => calculateStreak(h.id, data.completions)), 0);
   }, [data.habits, data.completions]);
 
-  const sortedHabits = useMemo(() => {
-    if (sortBy === 'manual') {
-      return data.habits;
+  const renderSummaryWidget = (id: string) => {
+    switch (id) {
+      case 'metrics':
+        return (
+          <section key="metrics" className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
+              <div className="p-2 bg-teal-500/10 text-teal-600 dark:text-cyan-400 rounded-xl w-fit mb-2">
+                <Target className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold tracking-tight">{data.habits.length}</p>
+                <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">Active Habits</p>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
+              <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl w-fit mb-2">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold tracking-tight">{totalCompletionsCount}</p>
+                <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">Total Done</p>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
+              <div className="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl w-fit mb-2">
+                <Flame className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold tracking-tight">{bestStreak}d</p>
+                <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">Best Streak</p>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
+              <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl w-fit mb-2">
+                <TrendingUp className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold tracking-tight">
+                  {Math.round(progress * 100)}%
+                </p>
+                <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">Today's Rate</p>
+              </div>
+            </div>
+          </section>
+        );
+      case 'monthly_heatmap':
+        return (
+          <section key="monthly_heatmap">
+            <MonthlyHeatmap
+              habits={data.habits}
+              completions={data.completions}
+              onSelectDate={(dateStr) => setHistoricalLogDate(dateStr)}
+            />
+          </section>
+        );
+      case 'weekly_summary':
+        return (
+          <section key="weekly_summary">
+            <WeeklySummary completions={data.completions} habits={data.habits} />
+          </section>
+        );
+      case 'weekly_heatmap':
+        return (
+          <section key="weekly_heatmap">
+            <WeeklyHeatmap
+              completions={data.completions}
+              habits={data.habits}
+              onSelectDate={(dateStr) => setHistoricalLogDate(dateStr)}
+            />
+          </section>
+        );
+      case 'milestones':
+        return (
+          <section key="milestones">
+            <MilestoneBadges habits={data.habits} completions={data.completions} />
+          </section>
+        );
+      default:
+        return null;
     }
-    return [...data.habits].sort((a, b) => {
-      if (sortBy === 'name') {
-        return a.title.localeCompare(b.title);
-      } else if (sortBy === 'priority') {
-        const priorityScore = { high: 3, medium: 2, low: 1 };
-        const scoreA = priorityScore[a.priority || 'medium'];
-        const scoreB = priorityScore[b.priority || 'medium'];
-        return scoreB - scoreA;
-      } else {
-        return b.createdAt - a.createdAt;
-      }
-    });
-  }, [data.habits, sortBy]);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 pb-32 transition-colors duration-300 relative overflow-hidden">
@@ -230,41 +346,19 @@ export default function App() {
               transition={{ duration: 0.2 }}
               className="space-y-8"
             >
-              {/* Tasks List Header & Filter */}
+              {/* Daily Motivation Quote */}
+              <DailyMotivation />
+
+              {/* Tasks List Header */}
               <section>
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-bold tracking-tight">Today's Tasks</h2>
-                      <button
-                        onClick={() => setHistoricalLogDate(todayStr)}
-                        className="text-xs font-semibold text-teal-600 dark:text-cyan-400 bg-teal-500/10 dark:bg-cyan-500/15 hover:bg-teal-500/20 border border-teal-500/20 px-2.5 py-1 rounded-xl flex items-center gap-1 transition-all active:scale-95"
-                        title="Log habits for past or future dates"
-                      >
-                        <History className="w-3.5 h-3.5" />
-                        <span>Backdate</span>
-                      </button>
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-gray-400">Check off your habits as you complete them</p>
-                  </div>
-
-                  <div className="relative">
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as SortOption)}
-                      className="appearance-none bg-white dark:bg-[#121824] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-gray-300 text-xs font-medium rounded-xl pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500 cursor-pointer transition-colors hover:bg-slate-100 dark:hover:bg-white/5"
-                    >
-                      <option value="manual">Custom (Drag to reorder)</option>
-                      <option value="date">Latest</option>
-                      <option value="name">Name</option>
-                      <option value="priority">Priority</option>
-                    </select>
-                    <Filter className="w-3.5 h-3.5 text-slate-400 dark:text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <h2 className="text-xl font-bold tracking-tight">Today's Tasks</h2>
                   </div>
                 </div>
                 
                 <div className="space-y-4">
-                  {sortedHabits.length === 0 ? (
+                  {data.habits.length === 0 ? (
                     <motion.div 
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -286,14 +380,13 @@ export default function App() {
                   ) : (
                     <Reorder.Group
                       axis="y"
-                      values={sortedHabits}
+                      values={data.habits}
                       onReorder={(newOrder) => {
                         reorderHabits(newOrder);
-                        if (sortBy !== 'manual') setSortBy('manual');
                       }}
                       className="space-y-3"
                     >
-                      {sortedHabits.map(habit => (
+                      {data.habits.map(habit => (
                         <HabitListItem
                           key={habit.id}
                           habit={habit}
@@ -349,80 +442,137 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="space-y-8"
+              className="space-y-6"
             >
-              {/* Overview Metrics Cards */}
-              <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between">
-                  <div className="p-2 bg-teal-500/10 text-teal-600 dark:text-cyan-400 rounded-xl w-fit mb-2">
-                    <Target className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold tracking-tight">{data.habits.length}</p>
-                    <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">Active Habits</p>
-                  </div>
+              {/* Header with Edit Layout Toggle */}
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-white/5">
+                <div>
+                  <h2 className="text-xl font-bold tracking-tight">Summaries & Analytics</h2>
+                  <p className="text-xs text-slate-500 dark:text-gray-400">Personalize your reports and stats layout</p>
                 </div>
-
-                <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between">
-                  <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl w-fit mb-2">
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold tracking-tight">{totalCompletionsCount}</p>
-                    <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">Total Done</p>
-                  </div>
+                <div className="flex items-center gap-2">
+                  {isEditingLayout && (
+                    <button
+                      onClick={resetSummaryLayout}
+                      className="text-xs font-medium text-slate-500 hover:text-slate-800 dark:text-gray-400 dark:hover:text-gray-200 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors flex items-center gap-1"
+                      title="Reset to default layout"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Reset</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setIsEditingLayout(!isEditingLayout)}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all active:scale-95 ${
+                      isEditingLayout
+                        ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
+                        : 'bg-white dark:bg-[#121824] text-slate-700 dark:text-gray-300 border-slate-200/80 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    {isEditingLayout ? (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Done</span>
+                      </>
+                    ) : (
+                      <>
+                        <SlidersHorizontal className="w-3.5 h-3.5 text-teal-600 dark:text-cyan-400" />
+                        <span>Edit Layout</span>
+                      </>
+                    )}
+                  </button>
                 </div>
+              </div>
 
-                <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between">
-                  <div className="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl w-fit mb-2">
-                    <Flame className="w-4 h-4" />
+              {/* Layout Editor Panel (when editing) */}
+              {isEditingLayout && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="p-4 rounded-2xl bg-teal-500/5 dark:bg-cyan-500/5 border border-teal-500/20 dark:border-cyan-500/20 space-y-3"
+                >
+                  <div className="text-xs font-semibold text-teal-800 dark:text-cyan-300 flex items-center justify-between">
+                    <span>Customize Widgets & Order</span>
+                    <span className="text-[10px] text-slate-500 dark:text-gray-400 font-normal">Drag or use arrows to reorder, toggle eye to show/hide</span>
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold tracking-tight">{bestStreak}d</p>
-                    <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">Best Streak</p>
+
+                  <Reorder.Group
+                    axis="y"
+                    values={summarySections}
+                    onReorder={setSummarySections}
+                    className="space-y-2"
+                  >
+                    {summarySections.map((sec, idx) => (
+                      <Reorder.Item
+                        key={sec.id}
+                        value={sec}
+                        id={sec.id}
+                        className={`flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#121824] border transition-all ${
+                          sec.visible
+                            ? 'border-slate-200 dark:border-white/10'
+                            : 'border-slate-200/40 dark:border-white/5 opacity-60'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <GripVertical className="w-4 h-4 text-slate-400 dark:text-gray-500 cursor-grab active:cursor-grabbing" />
+                          <span className="text-xs font-medium text-slate-800 dark:text-gray-200">{sec.name}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => moveSection(idx, 'up')}
+                            disabled={idx === 0}
+                            className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 text-slate-500 dark:text-gray-400"
+                            title="Move Up"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => moveSection(idx, 'down')}
+                            disabled={idx === summarySections.length - 1}
+                            className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 text-slate-500 dark:text-gray-400"
+                            title="Move Down"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => toggleSectionVisibility(sec.id)}
+                            className={`p-1.5 rounded-md transition-colors ${
+                              sec.visible
+                                ? 'text-teal-600 dark:text-cyan-400 hover:bg-teal-50 dark:hover:bg-cyan-950/40'
+                                : 'text-slate-400 dark:text-gray-600 hover:bg-slate-100 dark:hover:bg-white/5'
+                            }`}
+                            title={sec.visible ? 'Hide section' : 'Show section'}
+                          >
+                            {sec.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </Reorder.Item>
+                    ))}
+                  </Reorder.Group>
+                </motion.div>
+              )}
+
+              {/* Render active summary sections in user defined order */}
+              <div className="space-y-8">
+                {summarySections
+                  .filter(sec => sec.visible)
+                  .map(sec => renderSummaryWidget(sec.id))}
+
+                {summarySections.every(sec => !sec.visible) && (
+                  <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-200 dark:border-white/10">
+                    <EyeOff className="w-8 h-8 text-slate-400 dark:text-gray-500 mx-auto mb-2" />
+                    <p className="text-sm font-medium text-slate-600 dark:text-gray-400">All summary widgets are hidden</p>
+                    <button
+                      onClick={resetSummaryLayout}
+                      className="mt-3 text-xs font-semibold text-teal-600 dark:text-cyan-400 hover:underline"
+                    >
+                      Reset layout to show default widgets
+                    </button>
                   </div>
-                </div>
-
-                <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between">
-                  <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl w-fit mb-2">
-                    <TrendingUp className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold tracking-tight">
-                      {Math.round(progress * 100)}%
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">Today's Rate</p>
-                  </div>
-                </div>
-              </section>
-
-              {/* Monthly Heatmap Calendar View */}
-              <section>
-                <MonthlyHeatmap
-                  habits={data.habits}
-                  completions={data.completions}
-                  onSelectDate={(dateStr) => setHistoricalLogDate(dateStr)}
-                />
-              </section>
-
-              {/* Weekly Completion Summary Bar */}
-              <section>
-                <WeeklySummary completions={data.completions} habits={data.habits} />
-              </section>
-
-              {/* Weekly Heatmap Section */}
-              <section>
-                <WeeklyHeatmap
-                  completions={data.completions}
-                  habits={data.habits}
-                  onSelectDate={(dateStr) => setHistoricalLogDate(dateStr)}
-                />
-              </section>
-
-              {/* Milestone Badges Section */}
-              <section>
-                <MilestoneBadges habits={data.habits} completions={data.completions} />
-              </section>
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
