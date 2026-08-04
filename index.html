@@ -90,6 +90,10 @@
     }
 
     function calculateStreak(habitId, completions) {
+      return getStreakStartDate(habitId, completions).streak;
+    }
+
+    function getStreakStartDate(habitId, completions) {
       const habitCompletions = new Set(
         completions.filter(c => c.habitId === habitId).map(c => c.date)
       );
@@ -102,12 +106,21 @@
         dateStr = `${curr.getFullYear()}-${String(curr.getMonth() + 1).padStart(2, '0')}-${String(curr.getDate()).padStart(2, '0')}`;
       }
 
+      let startDate = null;
       while (habitCompletions.has(dateStr)) {
         streak++;
+        startDate = new Date(curr);
         curr.setDate(curr.getDate() - 1);
         dateStr = `${curr.getFullYear()}-${String(curr.getMonth() + 1).padStart(2, '0')}-${String(curr.getDate()).padStart(2, '0')}`;
       }
-      return streak;
+
+      let formattedStartDate = null;
+      if (startDate) {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        formattedStartDate = `${months[startDate.getMonth()]} ${startDate.getDate()}, ${startDate.getFullYear()}`;
+      }
+
+      return { streak, startDate, formattedStartDate };
     }
 
     function getWeeklyHistory(completions) {
@@ -439,8 +452,9 @@
     // Habit Card Component
     function HabitCard({ habit, completions, onToggle, onEdit, onDelete }) {
       const [showMenu, setShowMenu] = useState(false);
+      const [isStreakExpanded, setIsStreakExpanded] = useState(false);
       const completed = isCompletedToday(habit.id, completions);
-      const streak = calculateStreak(habit.id, completions);
+      const streakInfo = getStreakStartDate(habit.id, completions);
       const categoryDef = CategoryManager.getCategoryByName(habit.category);
 
       return (
@@ -460,7 +474,7 @@
               <h3 className={`text-base font-semibold tracking-tight truncate transition-all ${completed ? 'text-gray-500 line-through' : 'text-white'}`}>
                 {habit.title}
               </h3>
-              <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
+              <div className="flex items-center gap-2 mt-1 text-xs text-gray-400 flex-wrap">
                 <span className="flex items-center gap-1 font-medium text-gray-300 truncate">
                   <span>{categoryDef.icon}</span>
                   <span>{habit.category}</span>
@@ -473,12 +487,53 @@
                 }`}>
                   {habit.priority || 'medium'}
                 </span>
-                {streak > 0 && (
+                {streakInfo.streak > 0 && (
                   <>
                     <span>•</span>
-                    <span className="flex items-center gap-1 font-semibold text-amber-400">
-                      <IconFlame /> {streak}d
-                    </span>
+                    <div className="relative inline-block">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsStreakExpanded(!isStreakExpanded);
+                        }}
+                        className="streak-badge flex items-center gap-1 text-amber-400 font-semibold bg-amber-500/10 hover:bg-amber-500/20 px-2 py-0.5 rounded-full text-xs transition-all cursor-pointer border border-amber-500/20 active:scale-95"
+                        title="Click to view streak start date"
+                      >
+                        <IconFlame />
+                        <span>{streakInfo.streak}d</span>
+                        <span className={`text-[9px] transition-transform duration-200 inline-block ${isStreakExpanded ? 'rotate-180' : ''}`}>▼</span>
+                      </button>
+
+                      {isStreakExpanded && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsStreakExpanded(false);
+                            }}
+                          />
+                          <div
+                            className="absolute left-0 top-full mt-2 z-30 min-w-[190px] bg-[#1c1f26] border border-amber-500/30 rounded-2xl p-3 shadow-2xl text-xs text-gray-200 space-y-1.5 animate-fade-in"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="flex items-center gap-1.5 font-bold text-amber-400 pb-1.5 border-b border-white/10">
+                              <IconFlame />
+                              <span>Streak Overview</span>
+                            </div>
+                            <div className="flex justify-between items-center text-gray-300 pt-0.5">
+                              <span className="text-gray-400">Current Streak:</span>
+                              <span className="font-semibold text-white">{streakInfo.streak} {streakInfo.streak === 1 ? 'day' : 'days'}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-gray-300">
+                              <span className="text-gray-400">Started on:</span>
+                              <span className="font-semibold text-amber-300">{streakInfo.formattedStartDate || 'N/A'}</span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
@@ -742,6 +797,7 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       }, [data]);
 
+      const [activeTab, setActiveTab] = useState('tasks');
       const [isFormOpen, setIsFormOpen] = useState(false);
       const [isSettingsOpen, setIsSettingsOpen] = useState(false);
       const [editingHabit, setEditingHabit] = useState(null);
@@ -797,6 +853,12 @@
       const todayCompletions = data.habits.filter(h => data.completions.some(c => c.habitId === h.id && c.date === todayStr)).length;
       const progress = data.habits.length === 0 ? 0 : todayCompletions / data.habits.length;
 
+      const totalCompletionsCount = data.completions.length;
+      const bestStreak = useMemo(() => {
+        if (data.habits.length === 0) return 0;
+        return Math.max(...data.habits.map(h => calculateStreak(h.id, data.completions)), 0);
+      }, [data.habits, data.completions]);
+
       const sortedHabits = useMemo(() => {
         return [...data.habits].sort((a, b) => {
           if (sortBy === 'name') return a.title.localeCompare(b.title);
@@ -812,71 +874,143 @@
 
       return (
         <div className="min-h-screen bg-background pb-24">
-          <header className="px-6 pt-12 pb-6">
+          <header className="px-6 pt-10 pb-4">
             <div className="max-w-2xl mx-auto flex items-center justify-between">
               <div>
-                <p className="text-gray-400 font-medium mb-1">{formattedToday}</p>
+                <p className="text-gray-400 text-sm font-medium mb-1">{formattedToday}</p>
                 <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
                   Habits <IconSparkles />
                 </h1>
               </div>
-              <button onClick={() => setIsSettingsOpen(true)} className="w-12 h-12 rounded-full bg-surface hover:bg-surface-hover flex items-center justify-center text-gray-400 hover:text-white transition-colors border border-white/5 shadow-lg">
+              <button onClick={() => setIsSettingsOpen(true)} className="w-11 h-11 rounded-2xl bg-surface hover:bg-surface-hover flex items-center justify-center text-gray-400 hover:text-white transition-colors border border-white/5 shadow-lg">
                 <IconSettings />
               </button>
             </div>
           </header>
 
-          <main className="max-w-2xl mx-auto px-6 space-y-8">
-            <section><WeeklySummary completions={data.completions} habits={data.habits} /></section>
-
-            <section className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
-              <div className="bg-surface rounded-3xl p-6 flex flex-col items-center justify-center border border-white/5 shadow-xl relative overflow-hidden">
-                <h3 className="text-gray-400 font-medium mb-4 w-full text-center">Daily Goal</h3>
-                <ProgressRing progress={progress} size={140} strokeWidth={12} />
-                <p className="text-sm text-gray-400 mt-4 font-medium">{todayCompletions} of {data.habits.length} completed</p>
-              </div>
-              <WeeklyHeatmap completions={data.completions} habits={data.habits} />
-            </section>
-
-            <section><MilestoneBadges habits={data.habits} completions={data.completions} /></section>
-
-            <section>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white tracking-tight">Today's Tasks</h2>
-                <div className="relative">
-                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="appearance-none bg-surface border border-white/10 text-gray-300 text-sm rounded-xl pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer hover:bg-surface-hover transition-colors">
-                    <option value="date">Latest</option>
-                    <option value="name">Name</option>
-                    <option value="priority">Priority</option>
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400"><IconFilter /></div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {sortedHabits.length === 0 ? (
-                  <div className="text-center py-12 px-6 bg-surface rounded-3xl border border-white/5 border-dashed">
-                    <div className="w-16 h-16 bg-[#1c1f26] rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">✨</div>
-                    <h3 className="text-white font-medium mb-2">No habits yet</h3>
-                    <p className="text-gray-400 text-sm mb-6 max-w-xs mx-auto">Start building a better routine by adding your first habit today.</p>
-                    <button onClick={() => { setEditingHabit(null); setIsFormOpen(true); }} className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-full font-medium hover:bg-primary/90 transition-colors">
-                      <IconPlus /> Create Habit
-                    </button>
-                  </div>
-                ) : (
-                  sortedHabits.map(habit => (
-                    <HabitCard
-                      key={habit.id}
-                      habit={habit}
-                      completions={data.completions}
-                      onToggle={() => handleToggleCompletion(habit.id)}
-                      onEdit={() => { setEditingHabit(habit); setIsFormOpen(true); }}
-                      onDelete={() => deleteHabit(habit.id)}
-                    />
-                  ))
+          <nav className="px-6 mb-8">
+            <div className="max-w-2xl mx-auto bg-surface p-1.5 rounded-2xl border border-white/5 shadow-lg grid grid-cols-2 gap-1.5">
+              <button
+                onClick={() => setActiveTab('tasks')}
+                className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
+                  activeTab === 'tasks' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <span>Today's Tasks</span>
+                {data.habits.length > 0 && (
+                  <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${activeTab === 'tasks' ? 'bg-white/20 text-white' : 'bg-[#1c1f26] text-gray-400'}`}>
+                    {todayCompletions}/{data.habits.length}
+                  </span>
                 )}
+              </button>
+
+              <button
+                onClick={() => setActiveTab('summaries')}
+                className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
+                  activeTab === 'summaries' ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <span>Summaries</span>
+              </button>
+            </div>
+          </nav>
+
+          <main className="max-w-2xl mx-auto px-6">
+            {activeTab === 'tasks' ? (
+              <div className="space-y-8 animate-fade-in">
+                <section className="bg-surface rounded-3xl p-6 border border-white/5 shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center gap-6">
+                  <div className="flex-shrink-0">
+                    <ProgressRing progress={progress} size={130} strokeWidth={12} />
+                  </div>
+                  <div className="text-center sm:text-left flex-1 min-w-0">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-primary px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-2">
+                      🎯 Daily Focus
+                    </span>
+                    <h3 className="text-xl font-bold text-white tracking-tight mb-1">
+                      {progress === 1 ? '🎉 All Tasks Complete!' : `${todayCompletions} of ${data.habits.length} Tasks Done`}
+                    </h3>
+                    <p className="text-gray-400 text-sm leading-relaxed mb-3">
+                      {data.habits.length === 0
+                        ? 'No habits created yet. Add your first task to get started!'
+                        : progress === 1
+                        ? 'Fantastic job! You achieved 100% of your goals for today.'
+                        : `${data.habits.length - todayCompletions} remaining today. Keep building your daily momentum!`}
+                    </p>
+                    {data.habits.length > 0 && (
+                      <div className="w-full bg-[#1c1f26] h-2.5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                        <div className="h-full bg-gradient-to-r from-secondary to-primary rounded-full transition-all duration-500" style={{ width: `${Math.round(progress * 100)}%` }} />
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+                <section>
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="text-xl font-bold text-white tracking-tight">Today's Tasks</h2>
+                      <p className="text-xs text-gray-400">Check off your habits as you complete them</p>
+                    </div>
+                    <div className="relative">
+                      <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="appearance-none bg-surface border border-white/10 text-gray-300 text-xs font-medium rounded-xl pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer hover:bg-surface-hover transition-colors">
+                        <option value="date">Latest</option>
+                        <option value="name">Name</option>
+                        <option value="priority">Priority</option>
+                      </select>
+                      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400"><IconFilter /></div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {sortedHabits.length === 0 ? (
+                      <div className="text-center py-12 px-6 bg-surface rounded-3xl border border-white/5 border-dashed">
+                        <div className="w-16 h-16 bg-[#1c1f26] rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">✨</div>
+                        <h3 className="text-white font-medium mb-2">No habits yet</h3>
+                        <p className="text-gray-400 text-sm mb-6 max-w-xs mx-auto">Start building a better routine by adding your first habit today.</p>
+                        <button onClick={() => { setEditingHabit(null); setIsFormOpen(true); }} className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-full font-medium hover:bg-primary/90 transition-colors">
+                          <IconPlus /> Create Habit
+                        </button>
+                      </div>
+                    ) : (
+                      sortedHabits.map(habit => (
+                        <HabitCard
+                          key={habit.id}
+                          habit={habit}
+                          completions={data.completions}
+                          onToggle={() => handleToggleCompletion(habit.id)}
+                          onEdit={() => { setEditingHabit(habit); setIsFormOpen(true); }}
+                          onDelete={() => deleteHabit(habit.id)}
+                        />
+                      ))
+                    )}
+                  </div>
+                </section>
               </div>
-            </section>
+            ) : (
+              <div className="space-y-8 animate-fade-in">
+                <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="bg-surface rounded-2xl p-4 border border-white/5 shadow-lg flex flex-col justify-between">
+                    <p className="text-xs text-gray-400 font-medium">Active Habits</p>
+                    <p className="text-2xl font-bold text-white tracking-tight mt-1">{data.habits.length}</p>
+                  </div>
+                  <div className="bg-surface rounded-2xl p-4 border border-white/5 shadow-lg flex flex-col justify-between">
+                    <p className="text-xs text-gray-400 font-medium">Total Done</p>
+                    <p className="text-2xl font-bold text-white tracking-tight mt-1">{totalCompletionsCount}</p>
+                  </div>
+                  <div className="bg-surface rounded-2xl p-4 border border-white/5 shadow-lg flex flex-col justify-between">
+                    <p className="text-xs text-gray-400 font-medium">Best Streak</p>
+                    <p className="text-2xl font-bold text-white tracking-tight mt-1">{bestStreak}d</p>
+                  </div>
+                  <div className="bg-surface rounded-2xl p-4 border border-white/5 shadow-lg flex flex-col justify-between">
+                    <p className="text-xs text-gray-400 font-medium">Today's Rate</p>
+                    <p className="text-2xl font-bold text-white tracking-tight mt-1">{Math.round(progress * 100)}%</p>
+                  </div>
+                </section>
+
+                <section><WeeklySummary completions={data.completions} habits={data.habits} /></section>
+                <section><WeeklyHeatmap completions={data.completions} habits={data.habits} /></section>
+                <section><MilestoneBadges habits={data.habits} completions={data.completions} /></section>
+              </div>
+            )}
           </main>
 
           <button onClick={() => { setEditingHabit(null); setIsFormOpen(true); }} className="fixed bottom-8 right-8 w-16 h-16 bg-primary hover:bg-primary/90 text-white rounded-full shadow-[0_8px_30px_rgb(139,92,246,0.3)] flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus:outline-none z-40">

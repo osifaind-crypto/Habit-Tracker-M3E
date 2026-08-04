@@ -1,8 +1,8 @@
 import { Habit, CompletionRecord } from '../types';
-import { calculateStreak, isCompletedToday } from '../utils/dates';
+import { calculateStreak, isCompletedToday, getStreakStartDate } from '../utils/dates';
 import { CategoryManager } from '../utils/categories';
-import { motion } from 'motion/react';
-import { Check, Flame, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Check, Flame, MoreVertical, Edit2, Trash2, Calendar, ChevronDown } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface HabitCardProps {
@@ -16,8 +16,9 @@ interface HabitCardProps {
 
 export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: HabitCardProps) {
   const [showMenu, setShowMenu] = useState(false);
+  const [isStreakExpanded, setIsStreakExpanded] = useState(false);
   const completed = isCompletedToday(habit.id, completions);
-  const streak = calculateStreak(habit.id, completions);
+  const streakInfo = getStreakStartDate(habit.id, completions);
   const categoryDef = CategoryManager.getCategoryByName(habit.category);
 
   return (
@@ -61,7 +62,7 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
         <h3 className="text-lg font-semibold truncate text-white">
           {habit.title}
         </h3>
-        <div className="flex items-center gap-2 mt-1 text-sm text-gray-400">
+        <div className="flex items-center gap-2 mt-1 text-sm text-gray-400 flex-wrap">
           <span className="flex items-center gap-1 font-medium text-gray-300 truncate">
             <span>{categoryDef.icon}</span>
             <span>{habit.category}</span>
@@ -74,13 +75,62 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
           }`}>
             {habit.priority || 'medium'}
           </span>
-          {streak > 0 && (
+          {streakInfo.streak > 0 && (
             <>
               <span>•</span>
-              <span className="flex items-center gap-1 text-orange-400 font-medium">
-                <Flame className="w-4 h-4" />
-                {streak}
-              </span>
+              <div className="relative inline-block">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsStreakExpanded(!isStreakExpanded);
+                  }}
+                  className="streak-badge flex items-center gap-1 text-amber-400 font-semibold bg-amber-500/10 hover:bg-amber-500/20 px-2 py-0.5 rounded-full text-xs transition-all cursor-pointer border border-amber-500/20 active:scale-95"
+                  title="Click to view streak start date"
+                >
+                  <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
+                  <span>{streakInfo.streak}d</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isStreakExpanded ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {isStreakExpanded && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsStreakExpanded(false);
+                        }}
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: 5 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 5 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute left-0 top-full mt-2 z-30 min-w-[190px] bg-[#1c1f26] border border-amber-500/30 rounded-2xl p-3 shadow-2xl text-xs text-gray-200 space-y-1.5"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-center gap-1.5 font-bold text-amber-400 pb-1.5 border-b border-white/10">
+                          <Flame className="w-4 h-4 text-amber-400 fill-amber-400/20" />
+                          <span>Streak Overview</span>
+                        </div>
+                        <div className="flex justify-between items-center text-gray-300 pt-0.5">
+                          <span className="text-gray-400">Current Streak:</span>
+                          <span className="font-semibold text-white">{streakInfo.streak} {streakInfo.streak === 1 ? 'day' : 'days'}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-gray-300">
+                          <span className="text-gray-400 flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-amber-400" />
+                            Started on:
+                          </span>
+                          <span className="font-semibold text-amber-300">{streakInfo.formattedStartDate || 'N/A'}</span>
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
             </>
           )}
         </div>
