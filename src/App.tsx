@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { useAppState } from './hooks/useAppState';
 import { getTodayStr, calculateStreak } from './utils/dates';
@@ -11,7 +11,7 @@ import { MilestoneModal, MILESTONES, Milestone } from './components/MilestoneMod
 import { MilestoneBadges } from './components/MilestoneBadges';
 import { WeeklySummary } from './components/WeeklySummary';
 import { Habit } from './types';
-import { Plus, Settings, Sparkles, Filter, CheckCircle2, BarChart3, Flame, Award, Target, TrendingUp } from 'lucide-react';
+import { Plus, Settings, Sparkles, Filter, CheckCircle2, BarChart3, Flame, Target, TrendingUp, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
 
@@ -26,7 +26,25 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined);
   const [sortBy, setSortBy] = useState<SortOption>('date');
-  
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || saved === 'light') return saved;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  });
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   const [activeMilestone, setActiveMilestone] = useState<{ milestone: Milestone; habitTitle: string } | null>(null);
 
   const todayStr = getTodayStr();
@@ -112,22 +130,44 @@ export default function App() {
   }, [data.habits, sortBy]);
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 pb-32 transition-colors duration-300 relative overflow-hidden">
+      {/* Ambient Gemini Intelligence Mesh Glow Aura */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-gradient-to-b from-teal-500/10 via-cyan-500/5 to-transparent blur-3xl pointer-events-none -z-10 animate-gemini-glow" />
+
       {/* Header */}
       <header className="px-6 pt-10 pb-6">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-sm font-medium mb-1">{format(new Date(), 'EEEE, MMMM do')}</p>
-            <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
-              Habits <Sparkles className="w-6 h-6 text-primary" />
+            <p className="text-slate-500 dark:text-gray-400 text-sm font-medium mb-1">{format(new Date(), 'EEEE, MMMM do')}</p>
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+              <span>Habits</span>
+              <Sparkles className="w-6 h-6 text-teal-500 dark:text-cyan-400 animate-pulse" />
             </h1>
           </div>
-          <button 
-            onClick={() => setIsSettingsOpen(true)}
-            className="w-11 h-11 rounded-2xl bg-surface hover:bg-surface-hover flex items-center justify-center text-gray-400 hover:text-white transition-all border border-white/5 shadow-lg active:scale-95"
-          >
-            <Settings className="w-5 h-5" />
-          </button>
+
+          <div className="flex items-center gap-2">
+            {/* Theme Toggle Button */}
+            <button 
+              onClick={toggleTheme}
+              aria-label="Toggle dark/light mode"
+              className="w-11 h-11 rounded-2xl bg-white dark:bg-[#121824] hover:bg-slate-100 dark:hover:bg-[#1a2333] flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-lg active:scale-95"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5 text-amber-400" />
+              ) : (
+                <Moon className="w-5 h-5 text-indigo-600" />
+              )}
+            </button>
+
+            {/* Settings Button */}
+            <button 
+              onClick={() => setIsSettingsOpen(true)}
+              className="w-11 h-11 rounded-2xl bg-white dark:bg-[#121824] hover:bg-slate-100 dark:hover:bg-[#1a2333] flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-lg active:scale-95"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -146,21 +186,21 @@ export default function App() {
               <section>
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-xl font-bold text-white tracking-tight">Today's Tasks</h2>
-                    <p className="text-xs text-gray-400">Check off your habits as you complete them</p>
+                    <h2 className="text-xl font-bold tracking-tight">Today's Tasks</h2>
+                    <p className="text-xs text-slate-500 dark:text-gray-400">Check off your habits as you complete them</p>
                   </div>
 
                   <div className="relative">
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as SortOption)}
-                      className="appearance-none bg-surface border border-white/10 text-gray-300 text-xs font-medium rounded-xl pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer transition-colors hover:bg-surface-hover"
+                      className="appearance-none bg-white dark:bg-[#121824] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-gray-300 text-xs font-medium rounded-xl pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500 cursor-pointer transition-colors hover:bg-slate-100 dark:hover:bg-white/5"
                     >
                       <option value="date">Latest</option>
                       <option value="name">Name</option>
                       <option value="priority">Priority</option>
                     </select>
-                    <Filter className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <Filter className="w-3.5 h-3.5 text-slate-400 dark:text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
                 
@@ -170,16 +210,16 @@ export default function App() {
                       <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-center py-12 px-6 bg-surface rounded-3xl border border-white/5 border-dashed"
+                        className="text-center py-12 px-6 bg-white dark:bg-[#121824] rounded-3xl border border-slate-200/80 dark:border-white/5 border-dashed"
                       >
-                        <div className="w-16 h-16 bg-[#1c1f26] rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Sparkles className="w-8 h-8 text-gray-500" />
+                        <div className="w-16 h-16 bg-slate-100 dark:bg-[#1c1f26] rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Sparkles className="w-8 h-8 text-teal-500 dark:text-gray-500" />
                         </div>
-                        <h3 className="text-white font-medium mb-2">No habits yet</h3>
-                        <p className="text-gray-400 text-sm mb-6 max-w-xs mx-auto">Start building a better routine by adding your first habit today.</p>
+                        <h3 className="text-slate-900 dark:text-white font-medium mb-2">No habits yet</h3>
+                        <p className="text-slate-500 dark:text-gray-400 text-sm mb-6 max-w-xs mx-auto">Start building a better routine by adding your first habit today.</p>
                         <button
                           onClick={() => handleOpenForm()}
-                          className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-full font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25"
+                          className="inline-flex items-center gap-2 bg-gradient-to-r from-teal-500 via-cyan-500 to-indigo-500 text-white px-6 py-3 rounded-full font-medium hover:brightness-110 transition-all shadow-lg shadow-cyan-500/20"
                         >
                           <Plus className="w-5 h-5" />
                           Create Habit
@@ -202,21 +242,21 @@ export default function App() {
               </section>
 
               {/* Daily Goal Card */}
-              <section className="bg-surface rounded-3xl p-6 border border-white/5 shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center gap-6">
-                <div className="absolute top-1/2 left-12 -translate-y-1/2 w-32 h-32 bg-primary/20 rounded-full blur-[50px] pointer-events-none" />
+              <section className="bg-white dark:bg-[#121824] rounded-3xl p-6 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center gap-6">
+                <div className="absolute top-1/2 left-12 -translate-y-1/2 w-32 h-32 bg-cyan-500/15 rounded-full blur-[50px] pointer-events-none" />
                 
                 <div className="flex-shrink-0">
                   <ProgressRing progress={progress} size={130} strokeWidth={12} />
                 </div>
 
                 <div className="text-center sm:text-left flex-1 min-w-0">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-2">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-teal-600 dark:text-cyan-400 px-3 py-1 rounded-full bg-teal-500/10 dark:bg-cyan-500/15 border border-teal-500/20 dark:border-cyan-500/20 mb-2">
                     <Target className="w-3.5 h-3.5" /> Daily Focus
                   </span>
-                  <h3 className="text-xl font-bold text-white tracking-tight mb-1">
+                  <h3 className="text-xl font-bold tracking-tight mb-1">
                     {progress === 1 ? '🎉 All Tasks Complete!' : `${todayCompletions} of ${data.habits.length} Tasks Done`}
                   </h3>
-                  <p className="text-gray-400 text-sm leading-relaxed mb-3">
+                  <p className="text-slate-500 dark:text-gray-400 text-sm leading-relaxed mb-3">
                     {data.habits.length === 0
                       ? 'No habits created yet. Add your first task to get started!'
                       : progress === 1
@@ -225,9 +265,9 @@ export default function App() {
                   </p>
                   
                   {data.habits.length > 0 && (
-                    <div className="w-full bg-[#1c1f26] h-2.5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                    <div className="w-full bg-slate-100 dark:bg-[#1c2230] h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-200/80 dark:border-white/5">
                       <div
-                        className="h-full bg-gradient-to-r from-secondary to-primary rounded-full transition-all duration-500"
+                        className="h-full bg-gradient-to-r from-teal-500 via-cyan-500 to-indigo-500 rounded-full transition-all duration-500"
                         style={{ width: `${Math.round(progress * 100)}%` }}
                       />
                     </div>
@@ -246,45 +286,45 @@ export default function App() {
             >
               {/* Overview Metrics Cards */}
               <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="bg-surface rounded-2xl p-4 border border-white/5 shadow-lg flex flex-col justify-between">
-                  <div className="p-2 bg-primary/10 text-primary rounded-xl w-fit mb-2">
+                <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between">
+                  <div className="p-2 bg-teal-500/10 text-teal-600 dark:text-cyan-400 rounded-xl w-fit mb-2">
                     <Target className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-white tracking-tight">{data.habits.length}</p>
-                    <p className="text-xs text-gray-400 font-medium">Active Habits</p>
+                    <p className="text-2xl font-bold tracking-tight">{data.habits.length}</p>
+                    <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">Active Habits</p>
                   </div>
                 </div>
 
-                <div className="bg-surface rounded-2xl p-4 border border-white/5 shadow-lg flex flex-col justify-between">
-                  <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl w-fit mb-2">
+                <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between">
+                  <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl w-fit mb-2">
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-white tracking-tight">{totalCompletionsCount}</p>
-                    <p className="text-xs text-gray-400 font-medium">Total Done</p>
+                    <p className="text-2xl font-bold tracking-tight">{totalCompletionsCount}</p>
+                    <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">Total Done</p>
                   </div>
                 </div>
 
-                <div className="bg-surface rounded-2xl p-4 border border-white/5 shadow-lg flex flex-col justify-between">
-                  <div className="p-2 bg-amber-500/10 text-amber-400 rounded-xl w-fit mb-2">
+                <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between">
+                  <div className="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl w-fit mb-2">
                     <Flame className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-white tracking-tight">{bestStreak}d</p>
-                    <p className="text-xs text-gray-400 font-medium">Best Streak</p>
+                    <p className="text-2xl font-bold tracking-tight">{bestStreak}d</p>
+                    <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">Best Streak</p>
                   </div>
                 </div>
 
-                <div className="bg-surface rounded-2xl p-4 border border-white/5 shadow-lg flex flex-col justify-between">
-                  <div className="p-2 bg-secondary/10 text-secondary rounded-xl w-fit mb-2">
+                <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between">
+                  <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl w-fit mb-2">
                     <TrendingUp className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-white tracking-tight">
+                    <p className="text-2xl font-bold tracking-tight">
                       {Math.round(progress * 100)}%
                     </p>
-                    <p className="text-xs text-gray-400 font-medium">Today's Rate</p>
+                    <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">Today's Rate</p>
                   </div>
                 </div>
               </section>
@@ -310,20 +350,20 @@ export default function App() {
 
       {/* Floating Pill-Shaped Bottom Navigation Bar */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[92vw]">
-        <nav className="bg-[#16181d]/95 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.6)] flex items-center gap-1">
+        <nav className="bg-white/85 dark:bg-[#121824]/90 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 p-1.5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.6)] flex items-center gap-1">
           <button
             onClick={() => setActiveTab('tasks')}
             className={`flex items-center gap-2 py-2.5 px-4 rounded-full text-xs font-semibold transition-all ${
               activeTab === 'tasks'
-                ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                ? 'bg-gradient-to-r from-teal-500 via-cyan-500 to-indigo-500 text-white shadow-md shadow-cyan-500/20'
+                : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
             }`}
           >
             <CheckCircle2 className="w-4 h-4" />
             <span>Today's Tasks</span>
             {data.habits.length > 0 && (
               <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                activeTab === 'tasks' ? 'bg-white/20 text-white' : 'bg-[#1c1f26] text-gray-400'
+                activeTab === 'tasks' ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-[#1c1f26] text-slate-700 dark:text-gray-400'
               }`}>
                 {todayCompletions}/{data.habits.length}
               </span>
@@ -334,19 +374,19 @@ export default function App() {
             onClick={() => setActiveTab('summaries')}
             className={`flex items-center gap-2 py-2.5 px-4 rounded-full text-xs font-semibold transition-all ${
               activeTab === 'summaries'
-                ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                ? 'bg-gradient-to-r from-teal-500 via-cyan-500 to-indigo-500 text-white shadow-md shadow-cyan-500/20'
+                : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
             }`}
           >
             <BarChart3 className="w-4 h-4" />
             <span>Summaries</span>
           </button>
 
-          <div className="h-5 w-px bg-white/10 mx-0.5" />
+          <div className="h-5 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
 
           <button
             onClick={() => handleOpenForm()}
-            className="flex items-center gap-1.5 bg-gradient-to-r from-primary to-secondary text-white font-semibold text-xs px-3.5 py-2.5 rounded-full shadow-md hover:brightness-110 active:scale-95 transition-all"
+            className="flex items-center gap-1.5 bg-gradient-to-r from-teal-500 via-cyan-500 to-indigo-500 hover:brightness-110 text-white font-semibold text-xs px-3.5 py-2.5 rounded-full shadow-md active:scale-95 transition-all"
             title="Create new habit"
           >
             <Plus className="w-4 h-4" />

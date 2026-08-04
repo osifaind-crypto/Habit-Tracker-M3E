@@ -33,12 +33,14 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ scale: 1.01 }}
-      className={`relative rounded-3xl p-4 sm:p-5 flex items-center gap-4 transition-colors duration-300 ${
-        completed ? 'bg-surface-hover' : 'bg-surface'
+      className={`relative rounded-3xl p-4 sm:p-5 flex items-center gap-4 transition-all duration-300 shadow-sm dark:shadow-xl ${
+        completed
+          ? 'bg-slate-100/80 dark:bg-[#182030]'
+          : 'bg-white dark:bg-[#121824]'
       }`}
       style={{
-        boxShadow: completed ? `0 0 15px -5px ${habit.color}40` : 'none',
-        border: `1px solid ${completed ? `${habit.color}50` : 'transparent'}`,
+        boxShadow: completed ? `0 0 18px -4px ${habit.color}35` : undefined,
+        border: `1px solid ${completed ? `${habit.color}60` : 'rgba(148, 163, 184, 0.15)'}`,
       }}
     >
       <button
@@ -47,7 +49,7 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
         style={{
           width: '48px',
           height: '48px',
-          backgroundColor: completed ? habit.color : '#2a2d36',
+          backgroundColor: completed ? habit.color : 'rgba(148, 163, 184, 0.2)',
         }}
       >
         <motion.div
@@ -60,19 +62,19 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
       </button>
 
       <div className="flex-1 min-w-0">
-        <h3 className="text-lg font-semibold truncate text-white">
+        <h3 className="text-lg font-semibold truncate text-slate-900 dark:text-white">
           {habit.title}
         </h3>
-        <div className="flex items-center gap-2 mt-1 text-sm text-gray-400 flex-wrap">
-          <span className="flex items-center gap-1 font-medium text-gray-300 truncate">
+        <div className="flex items-center gap-2 mt-1 text-sm text-slate-500 dark:text-gray-400 flex-wrap">
+          <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-gray-300 truncate">
             <span>{categoryDef.icon}</span>
             <span>{habit.category}</span>
           </span>
           <span>•</span>
           <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${
-            habit.priority === 'high' ? 'bg-red-500/20 text-red-400' :
-            habit.priority === 'medium' ? 'bg-amber-500/20 text-amber-400' :
-            'bg-emerald-500/20 text-emerald-400'
+            habit.priority === 'high' ? 'bg-red-500/15 text-red-600 dark:text-red-400' :
+            habit.priority === 'medium' ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' :
+            'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
           }`}>
             {habit.priority || 'medium'}
           </span>
@@ -86,10 +88,10 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
                     e.stopPropagation();
                     setIsStreakExpanded(!isStreakExpanded);
                   }}
-                  className="streak-badge flex items-center gap-1 text-amber-400 font-semibold bg-amber-500/10 hover:bg-amber-500/20 px-2 py-0.5 rounded-full text-xs transition-all cursor-pointer border border-amber-500/20 active:scale-95"
+                  className="streak-badge flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold bg-amber-500/10 hover:bg-amber-500/20 px-2 py-0.5 rounded-full text-xs transition-all cursor-pointer border border-amber-500/20 active:scale-95"
                   title="Click to view streak start date"
                 >
-                  <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
+                  <Flame className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 fill-amber-400/20" />
                   <span>{streakInfo.streak}d</span>
                   <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isStreakExpanded ? 'rotate-180' : ''}`} />
                 </button>
@@ -109,30 +111,30 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
                         animate={{ opacity: 1, scaleY: 1, scaleX: 1, y: 0 }}
                         exit={{ opacity: 0, scaleY: 0.85, scaleX: 0.95, y: -8 }}
                         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                        className="streak-detail-view origin-top-left absolute left-0 top-full mt-2 z-30 min-w-[190px] bg-[#1c1f26] border border-amber-500/30 rounded-2xl p-3 shadow-2xl text-xs text-gray-200 space-y-1.5 overflow-hidden"
+                        className="streak-detail-view origin-top-left absolute left-0 top-full mt-2 z-30 min-w-[190px] bg-white dark:bg-[#1c1f26] border border-amber-500/30 rounded-2xl p-3 shadow-2xl text-xs text-slate-800 dark:text-gray-200 space-y-1.5 overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="flex items-center gap-1.5 font-bold text-amber-400 pb-1.5 border-b border-white/10">
-                          <Flame className="w-4 h-4 text-amber-400 fill-amber-400/20" />
+                        <div className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-400 pb-1.5 border-b border-slate-200 dark:border-white/10">
+                          <Flame className="w-4 h-4 text-amber-500 dark:text-amber-400 fill-amber-400/20" />
                           <span>Streak Overview</span>
                         </div>
-                        <div className="flex justify-between items-center text-gray-300 pt-0.5">
-                          <span className="text-gray-400">Current Streak:</span>
-                          <span className="font-semibold text-white">{streakInfo.streak} {streakInfo.streak === 1 ? 'day' : 'days'}</span>
+                        <div className="flex justify-between items-center text-slate-600 dark:text-gray-300 pt-0.5">
+                          <span className="text-slate-400 dark:text-gray-400">Current Streak:</span>
+                          <span className="font-semibold text-slate-900 dark:text-white">{streakInfo.streak} {streakInfo.streak === 1 ? 'day' : 'days'}</span>
                         </div>
-                        <div className="flex justify-between items-center text-gray-300">
-                          <span className="text-gray-400 flex items-center gap-1">
-                            <Calendar className="w-3 h-3 text-amber-400" />
+                        <div className="flex justify-between items-center text-slate-600 dark:text-gray-300">
+                          <span className="text-slate-400 dark:text-gray-400 flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-amber-500 dark:text-amber-400" />
                             Started on:
                           </span>
-                          <span className="font-semibold text-amber-300">{streakInfo.formattedStartDate || 'N/A'}</span>
+                          <span className="font-semibold text-amber-600 dark:text-amber-300">{streakInfo.formattedStartDate || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between items-center text-gray-300 pt-1 border-t border-white/10">
-                          <span className="text-gray-400 flex items-center gap-1">
-                            <TrendingUp className="w-3 h-3 text-emerald-400" />
+                        <div className="flex justify-between items-center text-slate-600 dark:text-gray-300 pt-1 border-t border-slate-200 dark:border-white/10">
+                          <span className="text-slate-400 dark:text-gray-400 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
                             Consistency:
                           </span>
-                          <span className="font-semibold text-emerald-400">{consistencyScore}%</span>
+                          <span className="font-semibold text-emerald-600 dark:text-emerald-400">{consistencyScore}%</span>
                         </div>
                       </motion.div>
                     </>
@@ -147,7 +149,7 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
       <div className="relative shrink-0">
         <button
           onClick={() => setShowMenu(!showMenu)}
-          className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+          className="p-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
         >
           <MoreVertical className="w-5 h-5" />
         </button>
@@ -161,14 +163,14 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="absolute right-0 top-full mt-2 w-36 bg-[#1c1f26] rounded-xl shadow-xl z-20 overflow-hidden border border-white/10"
+              className="absolute right-0 top-full mt-2 w-36 bg-white dark:bg-[#1c1f26] text-slate-800 dark:text-gray-200 rounded-xl shadow-xl z-20 overflow-hidden border border-slate-200 dark:border-white/10"
             >
               <button
                 onClick={() => {
                   setShowMenu(false);
                   onEdit();
                 }}
-                className="w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-white/5 transition-colors text-sm"
+                className="w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors text-sm"
               >
                 <Edit2 className="w-4 h-4" />
                 Edit
@@ -178,7 +180,7 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
                   setShowMenu(false);
                   onDelete();
                 }}
-                className="w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-white/5 transition-colors text-red-400 text-sm"
+                className="w-full text-left px-4 py-3 flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors text-red-500 dark:text-red-400 text-sm"
               >
                 <Trash2 className="w-4 h-4" />
                 Delete

@@ -69,31 +69,31 @@ export function SettingsModal({ isOpen, onClose, data, onImport, onClear }: Sett
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-md bg-surface rounded-3xl p-6 shadow-2xl border border-white/5"
+            className="relative w-full max-w-md bg-white dark:bg-[#121824] rounded-3xl p-6 shadow-2xl border border-slate-200/80 dark:border-white/10"
           >
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-xl font-bold text-white">Settings</h2>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Settings</h2>
               <button
                 onClick={onClose}
-                className="p-2 rounded-full hover:bg-white/10 text-gray-400 transition-colors"
+                className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-[#1c1f26] border border-white/5">
-                <h3 className="text-white font-medium mb-2">Data Backup</h3>
-                <p className="text-sm text-gray-400 mb-4">Export your habits and history to a file, or restore from a previous backup.</p>
+              <div className="p-4 rounded-2xl bg-slate-100 dark:bg-[#1c1f26] border border-slate-200 dark:border-white/5">
+                <h3 className="text-slate-900 dark:text-white font-medium mb-2">Data Backup</h3>
+                <p className="text-sm text-slate-500 dark:text-gray-400 mb-4">Export your habits and history to a file, or restore from a previous backup.</p>
                 <div className="flex gap-3">
                   <button
                     onClick={handleExport}
-                    className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white py-3 rounded-xl transition-colors font-medium text-sm"
+                    className="flex-1 flex items-center justify-center gap-2 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 text-slate-800 dark:text-white py-3 rounded-xl transition-colors font-medium text-sm"
                   >
                     <Download className="w-4 h-4" />
                     Export
                   </button>
-                  <label className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white py-3 rounded-xl transition-colors font-medium text-sm cursor-pointer">
+                  <label className="flex-1 flex items-center justify-center gap-2 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 text-slate-800 dark:text-white py-3 rounded-xl transition-colors font-medium text-sm cursor-pointer">
                     <Upload className="w-4 h-4" />
                     Import
                     <input type="file" accept=".json" className="hidden" onChange={handleImport} />
@@ -102,13 +102,13 @@ export function SettingsModal({ isOpen, onClose, data, onImport, onClear }: Sett
               </div>
 
               <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20">
-                <h3 className="text-red-400 font-medium mb-2 flex items-center gap-2">
+                <h3 className="text-red-600 dark:text-red-400 font-medium mb-2 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4" /> Danger Zone
                 </h3>
-                <p className="text-sm text-red-400/80 mb-4">Permanently delete all habits and history. This action cannot be undone.</p>
+                <p className="text-sm text-red-600/80 dark:text-red-400/80 mb-4">Permanently delete all habits and history. This action cannot be undone.</p>
                 <button
                   onClick={handleClear}
-                  className="w-full py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium transition-colors text-sm"
+                  className="w-full py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-600 dark:text-red-400 font-medium transition-colors text-sm"
                 >
                   Clear All Data
                 </button>
