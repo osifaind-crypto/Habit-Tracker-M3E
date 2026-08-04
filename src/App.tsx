@@ -9,6 +9,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { WeeklyHeatmap } from './components/WeeklyHeatmap';
 import { MilestoneModal, MILESTONES, Milestone } from './components/MilestoneModal';
 import { MilestoneBadges } from './components/MilestoneBadges';
+import { WeeklySummary } from './components/WeeklySummary';
 import { Habit } from './types';
 import { Plus, Settings, Sparkles, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -124,6 +125,11 @@ export default function App() {
       </header>
 
       <main className="max-w-2xl mx-auto px-6 space-y-8">
+        {/* Weekly Completion Summary Bar */}
+        <section>
+          <WeeklySummary completions={data.completions} habits={data.habits} />
+        </section>
+
         {/* Progress & Heatmap Section */}
         <section className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
           <div className="bg-surface rounded-3xl p-6 flex flex-col items-center justify-center border border-white/5 shadow-xl relative overflow-hidden">

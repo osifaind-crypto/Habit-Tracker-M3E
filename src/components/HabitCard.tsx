@@ -21,6 +21,10 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
   return (
     <motion.div
       layout
+      transition={{
+        layout: { type: 'spring', damping: 25, stiffness: 280 },
+        opacity: { duration: 0.2 },
+      }}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
