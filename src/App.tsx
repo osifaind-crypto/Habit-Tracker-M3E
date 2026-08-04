@@ -10,8 +10,10 @@ import { WeeklyHeatmap } from './components/WeeklyHeatmap';
 import { MilestoneModal, MILESTONES, Milestone } from './components/MilestoneModal';
 import { MilestoneBadges } from './components/MilestoneBadges';
 import { WeeklySummary } from './components/WeeklySummary';
+import { MonthlyHeatmap } from './components/MonthlyHeatmap';
+import { HistoricalLogModal } from './components/HistoricalLogModal';
 import { Habit } from './types';
-import { Plus, Settings, Sparkles, Filter, CheckCircle2, BarChart3, Flame, Target, TrendingUp, Sun, Moon } from 'lucide-react';
+import { Plus, Settings, Sparkles, Filter, CheckCircle2, BarChart3, Flame, Target, TrendingUp, Sun, Moon, Calendar as CalendarIcon, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
 
@@ -46,6 +48,7 @@ export default function App() {
   };
 
   const [activeMilestone, setActiveMilestone] = useState<{ milestone: Milestone; habitTitle: string } | null>(null);
+  const [historicalLogDate, setHistoricalLogDate] = useState<string | null>(null);
 
   const todayStr = getTodayStr();
   
@@ -62,15 +65,15 @@ export default function App() {
     }
   };
 
-  const handleToggleCompletion = (habitId: string) => {
-    const wasCompleted = data.completions.some(c => c.habitId === habitId && c.date === todayStr);
+  const handleToggleCompletionForDate = (habitId: string, targetDate: string = todayStr) => {
+    const wasCompleted = data.completions.some(c => c.habitId === habitId && c.date === targetDate);
     
     // Create preview completions state to check streak after toggle
     const updatedCompletions = wasCompleted
-      ? data.completions.filter(c => !(c.habitId === habitId && c.date === todayStr))
-      : [...data.completions, { habitId, date: todayStr }];
+      ? data.completions.filter(c => !(c.habitId === habitId && c.date === targetDate))
+      : [...data.completions, { habitId, date: targetDate }];
 
-    toggleCompletion(habitId, todayStr);
+    toggleCompletion(habitId, targetDate);
 
     if (!wasCompleted) {
       const targetHabit = data.habits.find(h => h.id === habitId);
@@ -85,20 +88,26 @@ export default function App() {
         });
       }
 
-      // Check for daily completion celebration (if all habits done today)
-      const total = data.habits.length;
-      const current = data.habits.filter(h => 
-        updatedCompletions.some(c => c.habitId === h.id && c.date === todayStr)
-      ).length;
-      
-      if (current === total && total > 0 && !matchedMilestone) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
+      // Check for completion celebration if targeting today
+      if (targetDate === todayStr) {
+        const total = data.habits.length;
+        const current = data.habits.filter(h => 
+          updatedCompletions.some(c => c.habitId === h.id && c.date === todayStr)
+        ).length;
+        
+        if (current === total && total > 0 && !matchedMilestone) {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }
       }
     }
+  };
+
+  const handleToggleCompletion = (habitId: string) => {
+    handleToggleCompletionForDate(habitId, todayStr);
   };
 
   // Calculate today's progress
@@ -186,7 +195,17 @@ export default function App() {
               <section>
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-xl font-bold tracking-tight">Today's Tasks</h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-bold tracking-tight">Today's Tasks</h2>
+                      <button
+                        onClick={() => setHistoricalLogDate(todayStr)}
+                        className="text-xs font-semibold text-teal-600 dark:text-cyan-400 bg-teal-500/10 dark:bg-cyan-500/15 hover:bg-teal-500/20 border border-teal-500/20 px-2.5 py-1 rounded-xl flex items-center gap-1 transition-all active:scale-95"
+                        title="Log habits for past or future dates"
+                      >
+                        <History className="w-3.5 h-3.5" />
+                        <span>Backdate</span>
+                      </button>
+                    </div>
                     <p className="text-xs text-slate-500 dark:text-gray-400">Check off your habits as you complete them</p>
                   </div>
 
@@ -329,14 +348,27 @@ export default function App() {
                 </div>
               </section>
 
+              {/* Monthly Heatmap Calendar View */}
+              <section>
+                <MonthlyHeatmap
+                  habits={data.habits}
+                  completions={data.completions}
+                  onSelectDate={(dateStr) => setHistoricalLogDate(dateStr)}
+                />
+              </section>
+
               {/* Weekly Completion Summary Bar */}
               <section>
                 <WeeklySummary completions={data.completions} habits={data.habits} />
               </section>
 
-              {/* Heatmap Section */}
+              {/* Weekly Heatmap Section */}
               <section>
-                <WeeklyHeatmap completions={data.completions} habits={data.habits} />
+                <WeeklyHeatmap
+                  completions={data.completions}
+                  habits={data.habits}
+                  onSelectDate={(dateStr) => setHistoricalLogDate(dateStr)}
+                />
               </section>
 
               {/* Milestone Badges Section */}
@@ -416,6 +448,16 @@ export default function App() {
         onClose={() => setActiveMilestone(null)}
         milestone={activeMilestone?.milestone || null}
         habitTitle={activeMilestone?.habitTitle || ''}
+      />
+
+      <HistoricalLogModal
+        isOpen={!!historicalLogDate}
+        dateStr={historicalLogDate}
+        onClose={() => setHistoricalLogDate(null)}
+        habits={data.habits}
+        completions={data.completions}
+        onToggleCompletion={handleToggleCompletionForDate}
+        onSelectDate={(newDate) => setHistoricalLogDate(newDate)}
       />
     </div>
   );

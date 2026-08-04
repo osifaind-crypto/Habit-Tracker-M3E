@@ -5,15 +5,19 @@ import { format } from 'date-fns';
 interface WeeklyHeatmapProps {
   completions: CompletionRecord[];
   habits: Habit[];
+  onSelectDate?: (dateStr: string) => void;
 }
 
-export function WeeklyHeatmap({ completions, habits }: WeeklyHeatmapProps) {
+export function WeeklyHeatmap({ completions, habits, onSelectDate }: WeeklyHeatmapProps) {
   const weekData = getWeeklyHistory(completions);
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
   return (
     <div className="bg-white dark:bg-[#121824] rounded-3xl p-6 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-xl transition-colors">
-      <h3 className="text-slate-900 dark:text-white font-medium mb-6">This Week's Activity</h3>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-slate-900 dark:text-white font-medium">This Week's Activity</h3>
+        <span className="text-xs text-slate-400 dark:text-gray-500">Click any day to backdate</span>
+      </div>
       <div className="flex justify-between items-end h-32 gap-2">
         {weekData.map((day) => {
           const isToday = day.dateStr === todayStr;
@@ -28,9 +32,14 @@ export function WeeklyHeatmap({ completions, habits }: WeeklyHeatmapProps) {
           if (percentage >= 1) bgClass = 'bg-gradient-to-t from-teal-500 to-cyan-500 shadow-[0_0_15px_-3px_rgba(20,184,166,0.5)]';
 
           return (
-            <div key={day.dateStr} className="flex flex-col items-center flex-1 gap-3">
+            <div
+              key={day.dateStr}
+              onClick={() => onSelectDate?.(day.dateStr)}
+              className="flex flex-col items-center flex-1 gap-3 cursor-pointer group"
+              title={`${format(day.date, 'EEEE, MMM d')}: ${completedCount}/${habits.length} completed. Click to log.`}
+            >
               <div 
-                className={`w-full max-w-[2rem] rounded-full transition-all duration-500 relative flex items-end ${bgClass}`}
+                className={`w-full max-w-[2rem] rounded-full transition-all duration-300 relative flex items-end group-hover:scale-105 ${bgClass}`}
                 style={{ height: '100%', minHeight: '8px', border: isToday ? '1.5px solid rgba(20, 184, 166, 0.6)' : 'none' }}
               >
                 {/* Visual bar filling up */}

@@ -306,14 +306,325 @@
       );
     }
 
+    // Monthly Heatmap Component (Monthly Calendar Grid View)
+    function MonthlyHeatmap({ habits, completions, onSelectDate }) {
+      const [currentMonth, setCurrentMonth] = useState(new Date());
+      const [hoveredDate, setHoveredDate] = useState(null);
+
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth(); // 0-11
+
+      const firstDayOfMonth = new Date(year, month, 1);
+      const lastDayOfMonth = new Date(year, month + 1, 0);
+
+      // Start on Monday (0=Mon, 6=Sun)
+      let startDayOfWeek = firstDayOfMonth.getDay() - 1;
+      if (startDayOfWeek === -1) startDayOfWeek = 6;
+
+      const daysInGrid = [];
+
+      // Leading padding days from previous month
+      const prevMonthLastDay = new Date(year, month, 0).getDate();
+      for (let i = startDayOfWeek - 1; i >= 0; i--) {
+        const d = new Date(year, month - 1, prevMonthLastDay - i);
+        daysInGrid.push({ date: d, isCurrentMonth: false });
+      }
+
+      // Days in current month
+      for (let d = 1; d <= lastDayOfMonth.getDate(); d++) {
+        const dateObj = new Date(year, month, d);
+        daysInGrid.push({ date: dateObj, isCurrentMonth: true });
+      }
+
+      // Trailing padding days to fill 7 columns
+      const remaining = 7 - (daysInGrid.length % 7);
+      if (remaining < 7) {
+        for (let i = 1; i <= remaining; i++) {
+          const d = new Date(year, month + 1, i);
+          daysInGrid.push({ date: d, isCurrentMonth: false });
+        }
+      }
+
+      const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+      const todayStr = getTodayStr();
+
+      const handlePrev = () => setCurrentMonth(new Date(year, month - 1, 1));
+      const handleNext = () => setCurrentMonth(new Date(year, month + 1, 1));
+      const handleToday = () => setCurrentMonth(new Date());
+
+      return (
+        <div className="bg-surface rounded-3xl p-5 sm:p-6 border border-white/5 shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-primary/10 text-primary rounded-2xl">
+                📅
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-base sm:text-lg flex items-center gap-2">
+                  Heatmap Calendar
+                  <IconSparkles />
+                </h3>
+                <p className="text-gray-400 text-xs">Click any day cell to backdate or view historical completions</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button onClick={handlePrev} className="p-2 rounded-xl bg-[#1c1f26] hover:bg-white/10 text-gray-300 hover:text-white transition-all active:scale-95 border border-white/5" title="Previous Month">
+                ◀
+              </button>
+              <span className="text-sm font-bold text-white min-w-[120px] text-center px-2">
+                {monthNames[month]} {year}
+              </span>
+              <button onClick={handleNext} className="p-2 rounded-xl bg-[#1c1f26] hover:bg-white/10 text-gray-300 hover:text-white transition-all active:scale-95 border border-white/5" title="Next Month">
+                ▶
+              </button>
+              <button onClick={handleToday} className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-primary/20 text-primary hover:bg-primary/30 transition-all border border-primary/30">
+                Today
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-7 gap-1.5 sm:gap-2 text-center mb-2">
+            {dayNames.map(day => (
+              <div key={day} className="text-xs font-semibold text-gray-400 py-1">{day}</div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+            {daysInGrid.map(({ date, isCurrentMonth }, idx) => {
+              const y = date.getFullYear();
+              const m = String(date.getMonth() + 1).padStart(2, '0');
+              const d = String(date.getDate()).padStart(2, '0');
+              const dateStr = `${y}-${m}-${d}`;
+
+              const isTodayCell = dateStr === todayStr;
+              const dayCompletions = completions.filter(c => c.date === dateStr);
+              const completedCount = habits.filter(h => dayCompletions.some(c => c.habitId === h.id)).length;
+              const totalHabits = habits.length;
+              const percentage = totalHabits === 0 ? 0 : completedCount / totalHabits;
+
+              let cellStyle = "bg-[#16181f] text-gray-600 opacity-40 border-transparent";
+              if (isCurrentMonth) {
+                if (percentage === 0) {
+                  cellStyle = "bg-[#1c1f26] text-gray-400 border-white/5 hover:border-primary/40";
+                } else if (percentage < 0.35) {
+                  cellStyle = "bg-primary/20 text-violet-300 border-primary/30 hover:bg-primary/30";
+                } else if (percentage < 0.7) {
+                  cellStyle = "bg-primary/50 text-violet-200 border-primary/50 hover:bg-primary/60";
+                } else if (percentage < 1) {
+                  cellStyle = "bg-primary/80 text-white border-primary shadow-sm shadow-primary/20";
+                } else {
+                  cellStyle = "bg-gradient-to-tr from-violet-600 via-indigo-500 to-cyan-500 text-white border-cyan-400 font-bold shadow-md shadow-primary/40 scale-105";
+                }
+              }
+
+              return (
+                <div key={idx} className="relative group">
+                  <button
+                    onClick={() => onSelectDate && onSelectDate(dateStr)}
+                    onMouseEnter={() => setHoveredDate(dateStr)}
+                    onMouseLeave={() => setHoveredDate(null)}
+                    className={`w-full aspect-square rounded-2xl flex flex-col items-center justify-between p-1.5 border transition-all cursor-pointer ${cellStyle} ${isTodayCell ? 'ring-2 ring-primary ring-offset-2 ring-offset-[#0d0f12]' : ''}`}
+                  >
+                    <span className={`text-xs sm:text-sm font-semibold ${isTodayCell ? 'underline font-extrabold' : ''}`}>
+                      {date.getDate()}
+                    </span>
+                    {isCurrentMonth && habits.length > 0 && (
+                      <div className="flex items-center justify-center">
+                        {completedCount > 0 ? (
+                          <span className="text-[10px] font-bold">{completedCount}/{totalHabits}</span>
+                        ) : (
+                          <span className="w-1.5 h-1.5 rounded-full bg-white/10" />
+                        )}
+                      </div>
+                    )}
+                  </button>
+
+                  {hoveredDate === dateStr && isCurrentMonth && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-30 pointer-events-none w-48 bg-[#1a1c23] text-white p-2.5 rounded-2xl shadow-2xl border border-white/10 text-xs space-y-1.5 animate-fade-in">
+                      <div className="font-bold text-primary border-b border-white/10 pb-1 flex justify-between">
+                        <span>{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        <span className="text-[10px] text-gray-400 font-normal">Click to log</span>
+                      </div>
+                      <div className="flex justify-between text-gray-300">
+                        <span>Completed:</span>
+                        <span className="font-semibold text-white">{completedCount} of {totalHabits} ({Math.round(percentage * 100)}%)</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-400">
+            <div className="flex items-center gap-1.5">
+              <span>Intensity:</span>
+              <div className="flex items-center gap-1">
+                <span className="w-3 h-3 rounded bg-[#1c1f26] border border-white/5" title="0%" />
+                <span className="w-3 h-3 rounded bg-primary/20 border border-primary/30" title="1-33%" />
+                <span className="w-3 h-3 rounded bg-primary/50 border border-primary/50" title="34-66%" />
+                <span className="w-3 h-3 rounded bg-primary/80" title="67-99%" />
+                <span className="w-3 h-3 rounded bg-gradient-to-tr from-violet-600 to-cyan-500 shadow-sm" title="100%" />
+              </div>
+            </div>
+
+            <button
+              onClick={() => onSelectDate && onSelectDate(todayStr)}
+              className="text-primary font-semibold hover:underline flex items-center gap-1"
+            >
+              + Backdate Past Habit
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Historical Log Modal Component
+    function HistoricalLogModal({ isOpen, dateStr, onClose, habits, completions, onToggleCompletion, onSelectDate }) {
+      if (!isOpen || !dateStr) return null;
+
+      const parts = dateStr.split('-');
+      const parsedDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      const formattedHeader = parsedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      const isToday = getTodayStr() === dateStr;
+
+      const handlePrev = () => {
+        const prev = new Date(parsedDate);
+        prev.setDate(prev.getDate() - 1);
+        const y = prev.getFullYear();
+        const m = String(prev.getMonth() + 1).padStart(2, '0');
+        const d = String(prev.getDate()).padStart(2, '0');
+        onSelectDate(`${y}-${m}-${d}`);
+      };
+
+      const handleNext = () => {
+        const next = new Date(parsedDate);
+        next.setDate(next.getDate() + 1);
+        const y = next.getFullYear();
+        const m = String(next.getMonth() + 1).padStart(2, '0');
+        const d = String(next.getDate()).padStart(2, '0');
+        onSelectDate(`${y}-${m}-${d}`);
+      };
+
+      const handleToday = () => {
+        onSelectDate(getTodayStr());
+      };
+
+      const dayCompletions = completions.filter(c => c.date === dateStr);
+      const completedCount = habits.filter(h => dayCompletions.some(c => c.habitId === h.id)).length;
+      const totalHabits = habits.length;
+      const percentage = totalHabits === 0 ? 0 : Math.round((completedCount / totalHabits) * 100);
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+          <div className="relative w-full max-w-lg bg-surface rounded-3xl p-6 shadow-2xl border border-white/5 animate-fade-in z-10 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-primary/20 text-primary">📅</div>
+                <div>
+                  <span className="text-xs font-semibold text-primary uppercase tracking-wider">{isToday ? 'Today' : 'Historical Log'}</span>
+                  <h2 className="text-lg font-bold text-white">{formattedHeader}</h2>
+                </div>
+              </div>
+              <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 text-gray-400 transition-colors"><IconX /></button>
+            </div>
+
+            <div className="flex items-center justify-between bg-[#1c1f26] p-2 rounded-2xl mb-5 border border-white/5">
+              <button onClick={handlePrev} className="flex items-center gap-1 text-xs font-medium text-gray-300 hover:text-white px-3 py-1.5 rounded-xl hover:bg-white/10 transition-all">
+                ◀ Prev Day
+              </button>
+              {!isToday && (
+                <button onClick={handleToday} className="text-xs font-bold text-primary hover:underline px-2 py-1">
+                  Jump to Today
+                </button>
+              )}
+              <button onClick={handleNext} className="flex items-center gap-1 text-xs font-medium text-gray-300 hover:text-white px-3 py-1.5 rounded-xl hover:bg-white/10 transition-all">
+                Next Day ▶
+              </button>
+            </div>
+
+            <div className="bg-primary/10 p-4 rounded-2xl border border-primary/20 mb-5 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-400">Backdated Completion Summary</p>
+                <p className="text-base font-bold text-white">{completedCount} of {totalHabits} Habits Completed ({percentage}%)</p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center font-bold text-sm shadow-md">
+                {percentage}%
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+              {habits.length === 0 ? (
+                <p className="text-center text-sm text-gray-400 py-8">No habits created yet.</p>
+              ) : (
+                habits.map(habit => {
+                  const isCompleted = dayCompletions.some(c => c.habitId === habit.id);
+                  const categoryDef = CategoryManager.getCategoryByName(habit.category);
+
+                  return (
+                    <div
+                      key={habit.id}
+                      onClick={() => onToggleCompletion(habit.id, dateStr)}
+                      className={`p-3.5 rounded-2xl flex items-center justify-between cursor-pointer border transition-all ${
+                        isCompleted ? 'bg-primary/20 border-primary/40' : 'bg-[#1c1f26] border-white/5 hover:bg-white/5'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                            isCompleted ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-white/10 text-gray-400'
+                          }`}
+                          style={{ backgroundColor: isCompleted ? habit.color : undefined }}
+                        >
+                          <IconCheck />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className={`text-sm font-semibold truncate ${isCompleted ? 'text-white line-through opacity-80' : 'text-gray-200'}`}>
+                            {habit.title}
+                          </h4>
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <span>{categoryDef.icon} {habit.category}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                        isCompleted ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/10 text-gray-400'
+                      }`}>
+                        {isCompleted ? 'Done' : 'Pending'}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="pt-4 border-t border-white/10 mt-4 flex items-center justify-between text-xs text-gray-400">
+              <span className="flex items-center gap-1 text-amber-400">🔥 Streaks auto-recalculate</span>
+              <button onClick={onClose} className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white font-semibold rounded-xl">
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // Weekly Heatmap Component
-    function WeeklyHeatmap({ completions, habits }) {
+    function WeeklyHeatmap({ completions, habits, onSelectDate }) {
       const weekData = getWeeklyHistory(completions);
       const todayStr = getTodayStr();
 
       return (
         <div className="bg-surface rounded-3xl p-6 border border-white/5">
-          <h3 className="text-white font-medium mb-6">This Week's Activity</h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-white font-medium">This Week's Activity</h3>
+            <span className="text-xs text-gray-400">Click any day to backdate</span>
+          </div>
           <div className="flex justify-between items-end h-32 gap-2">
             {weekData.map((day) => {
               const isToday = day.dateStr === todayStr;
@@ -329,9 +640,9 @@
               const dayName = day.date.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0);
 
               return (
-                <div key={day.dateStr} className="flex flex-col items-center flex-1 gap-3">
+                <div key={day.dateStr} onClick={() => onSelectDate && onSelectDate(day.dateStr)} className="flex flex-col items-center flex-1 gap-3 cursor-pointer group">
                   <div
-                    className={`w-full max-w-[2rem] rounded-full transition-all duration-500 relative flex items-end ${bgClass}`}
+                    className={`w-full max-w-[2rem] rounded-full transition-all duration-300 relative flex items-end group-hover:scale-105 ${bgClass}`}
                     style={{ height: '100%', minHeight: '8px', border: isToday ? '1px solid rgba(255,255,255,0.3)' : 'none' }}
                   >
                     <div
@@ -837,6 +1148,7 @@
       const [editingHabit, setEditingHabit] = useState(null);
       const [sortBy, setSortBy] = useState('date');
       const [activeMilestone, setActiveMilestone] = useState(null);
+      const [historicalLogDate, setHistoricalLogDate] = useState(null);
 
       const todayStr = getTodayStr();
 
@@ -859,11 +1171,11 @@
         }));
       };
 
-      const handleToggleCompletion = (habitId) => {
-        const wasCompleted = data.completions.some(c => c.habitId === habitId && c.date === todayStr);
+      const handleToggleCompletionForDate = (habitId, targetDate = todayStr) => {
+        const wasCompleted = data.completions.some(c => c.habitId === habitId && c.date === targetDate);
         const updatedCompletions = wasCompleted
-          ? data.completions.filter(c => !(c.habitId === habitId && c.date === todayStr))
-          : [...data.completions, { habitId, date: todayStr }];
+          ? data.completions.filter(c => !(c.habitId === habitId && c.date === targetDate))
+          : [...data.completions, { habitId, date: targetDate }];
 
         setData(prev => ({ ...prev, completions: updatedCompletions }));
 
@@ -876,12 +1188,18 @@
             setActiveMilestone({ milestone: matched, habitTitle: targetHabit.title });
           }
 
-          const total = data.habits.length;
-          const current = data.habits.filter(h => updatedCompletions.some(c => c.habitId === h.id && c.date === todayStr)).length;
-          if (current === total && total > 0 && !matched && typeof confetti === 'function') {
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+          if (targetDate === todayStr) {
+            const total = data.habits.length;
+            const current = data.habits.filter(h => updatedCompletions.some(c => c.habitId === h.id && c.date === todayStr)).length;
+            if (current === total && total > 0 && !matched && typeof confetti === 'function') {
+              confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
           }
         }
+      };
+
+      const handleToggleCompletion = (habitId) => {
+        handleToggleCompletionForDate(habitId, todayStr);
       };
 
       const todayCompletions = data.habits.filter(h => data.completions.some(c => c.habitId === h.id && c.date === todayStr)).length;
@@ -928,7 +1246,12 @@
                 <section>
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h2 className="text-xl font-bold text-white tracking-tight">Today's Tasks</h2>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-xl font-bold text-white tracking-tight">Today's Tasks</h2>
+                        <button onClick={() => setHistoricalLogDate(todayStr)} className="text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 px-2.5 py-1 rounded-xl flex items-center gap-1 transition-all active:scale-95">
+                          <span>📅 Backdate</span>
+                        </button>
+                      </div>
                       <p className="text-xs text-gray-400">Check off your habits as you complete them</p>
                     </div>
                     <div className="relative">
@@ -1013,8 +1336,9 @@
                   </div>
                 </section>
 
+                <section><MonthlyHeatmap habits={data.habits} completions={data.completions} onSelectDate={(date) => setHistoricalLogDate(date)} /></section>
                 <section><WeeklySummary completions={data.completions} habits={data.habits} /></section>
-                <section><WeeklyHeatmap completions={data.completions} habits={data.habits} /></section>
+                <section><WeeklyHeatmap completions={data.completions} habits={data.habits} onSelectDate={(date) => setHistoricalLogDate(date)} /></section>
                 <section><MilestoneBadges habits={data.habits} completions={data.completions} /></section>
               </div>
             )}
@@ -1062,6 +1386,7 @@
           <HabitFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} onSave={handleSaveHabit} initialData={editingHabit} />
           <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} data={data} onImport={(imp) => setData(imp)} onClear={() => setData({ habits: [], completions: [] })} />
           <MilestoneModal isOpen={!!activeMilestone} onClose={() => setActiveMilestone(null)} milestone={activeMilestone?.milestone} habitTitle={activeMilestone?.habitTitle} />
+          <HistoricalLogModal isOpen={!!historicalLogDate} dateStr={historicalLogDate} onClose={() => setHistoricalLogDate(null)} habits={data.habits} completions={data.completions} onToggleCompletion={handleToggleCompletionForDate} onSelectDate={(d) => setHistoricalLogDate(d)} />
         </div>
       );
     }
