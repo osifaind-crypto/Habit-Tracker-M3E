@@ -508,15 +508,23 @@ export default function App() {
                         key={sec.id}
                         value={sec}
                         id={sec.id}
-                        className={`flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#121824] border transition-all ${
+                        className={`flex items-center justify-between p-3 rounded-xl transition-all border ${
                           sec.visible
-                            ? 'border-slate-200 dark:border-white/10'
-                            : 'border-slate-200/40 dark:border-white/5 opacity-60'
+                            ? 'bg-white dark:bg-[#121824] border-slate-200 dark:border-white/10'
+                            : 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-200 dark:border-rose-500/30'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <GripVertical className="w-4 h-4 text-slate-400 dark:text-gray-500 cursor-grab active:cursor-grabbing" />
-                          <span className="text-xs font-medium text-slate-800 dark:text-gray-200">{sec.name}</span>
+                          <span className={`text-xs font-medium ${sec.visible ? 'text-slate-800 dark:text-gray-200' : 'text-slate-600 dark:text-gray-300'}`}>
+                            {sec.name}
+                          </span>
+                          {!sec.visible && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                              <EyeOff className="w-3 h-3" />
+                              Hidden
+                            </span>
+                          )}
                         </div>
 
                         <div className="flex items-center gap-1">
@@ -541,7 +549,7 @@ export default function App() {
                             className={`p-1.5 rounded-md transition-colors ${
                               sec.visible
                                 ? 'text-teal-600 dark:text-cyan-400 hover:bg-teal-50 dark:hover:bg-cyan-950/40'
-                                : 'text-slate-400 dark:text-gray-600 hover:bg-slate-100 dark:hover:bg-white/5'
+                                : 'text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20'
                             }`}
                             title={sec.visible ? 'Hide section' : 'Show section'}
                           >

@@ -1548,11 +1548,20 @@
                       {summarySections.map((sec, idx) => (
                         <div
                           key={sec.id}
-                          className={`flex items-center justify-between p-3 rounded-xl bg-surface border transition-all ${
-                            sec.visible ? 'border-white/10' : 'border-white/5 opacity-50'
+                          className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                            sec.visible
+                              ? 'bg-surface border-white/10'
+                              : 'bg-rose-950/20 border-rose-500/30'
                           }`}
                         >
-                          <span className="text-xs font-medium text-gray-200">{sec.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-gray-200">{sec.name}</span>
+                            {!sec.visible && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                                🙈 Hidden
+                              </span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => moveSection(idx, 'up')}
@@ -1571,7 +1580,7 @@
                             <button
                               onClick={() => toggleSectionVisibility(sec.id)}
                               className={`p-1 rounded transition-colors ${
-                                sec.visible ? 'text-primary' : 'text-gray-500'
+                                sec.visible ? 'text-primary' : 'text-rose-400 bg-rose-500/10'
                               }`}
                             >
                               {sec.visible ? '👁️' : '🙈'}
