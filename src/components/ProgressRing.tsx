@@ -109,7 +109,7 @@ export function ProgressRing({
         transition={{ duration: 0.5, delay: 0.3, ease: 'easeOut' }}
         className="absolute flex flex-col items-center justify-center text-center z-10"
       >
-        <span className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tighter">
+        <span className="m3-display-large m3-metric-morph text-[#80d4ff] dark:text-white tracking-tight drop-shadow-[0_0_12px_rgba(128,212,255,0.4)]">
           {Math.round(clampedProgress * 100)}%
         </span>
       </motion.div>

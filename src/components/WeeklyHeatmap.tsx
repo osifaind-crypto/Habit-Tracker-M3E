@@ -13,7 +13,7 @@ export function WeeklyHeatmap({ completions, habits, onSelectDate }: WeeklyHeatm
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
   return (
-    <div className="bg-white dark:bg-[#121824] rounded-3xl p-6 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-xl transition-colors">
+    <div className="m3-card-asymmetric bg-white dark:bg-[#121824] p-6 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-xl transition-colors">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-slate-900 dark:text-white font-medium">This Week's Activity</h3>
         <span className="text-xs text-slate-400 dark:text-gray-500">Click any day to backdate</span>

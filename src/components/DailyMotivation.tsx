@@ -53,9 +53,9 @@ export function DailyMotivation() {
   };
 
   return (
-    <div className="mb-6 rounded-2xl bg-slate-100/60 dark:bg-[#121824]/60 border border-slate-200/60 dark:border-white/5 p-4 transition-all">
+    <div className="mb-6 m3-card-asymmetric bg-slate-100/60 dark:bg-[#121824]/60 border border-slate-200/60 dark:border-white/5 p-4 sm:p-5 transition-all">
       <div className="flex items-center justify-between gap-2 mb-1.5">
-        <div className="flex items-center gap-1.5 text-slate-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider">
+        <div className="m3-badge-asymmetric flex items-center gap-1.5 text-slate-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider px-2.5 py-0.5 bg-slate-200/50 dark:bg-white/5">
           <Sparkles className="w-3.5 h-3.5 text-teal-500 dark:text-cyan-400" />
           <span>Daily Thought</span>
         </div>

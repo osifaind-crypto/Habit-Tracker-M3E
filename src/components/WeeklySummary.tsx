@@ -20,7 +20,7 @@ export function WeeklySummary({ completions, habits }: WeeklySummaryProps) {
   const percentage = Math.min(100, Math.round((totalCompletedThisWeek / weeklyTarget) * 100));
 
   return (
-    <div className="bg-white dark:bg-[#121824] rounded-3xl p-5 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-xl relative overflow-hidden transition-colors">
+    <div className="m3-card-asymmetric bg-white dark:bg-[#121824] p-5 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-xl relative overflow-hidden transition-colors">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-teal-500/10 dark:bg-cyan-500/20 text-teal-600 dark:text-cyan-400 rounded-xl">

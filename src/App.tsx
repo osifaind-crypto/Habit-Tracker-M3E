@@ -96,6 +96,16 @@ export default function App() {
     localStorage.setItem('summaries_layout_config', JSON.stringify(summarySections));
   }, [summarySections]);
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const toggleSectionVisibility = (id: string) => {
     setSummarySections(prev => prev.map(sec => sec.id === id ? { ...sec, visible: !sec.visible } : sec));
   };
@@ -213,7 +223,7 @@ export default function App() {
       case 'metrics':
         return (
           <section key="metrics" className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
+            <div className="m3-card-asymmetric bg-white dark:bg-[#121824] p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
               <div className="p-2 bg-teal-500/10 text-teal-600 dark:text-cyan-400 rounded-xl w-fit mb-2">
                 <Target className="w-4 h-4" />
               </div>
@@ -223,7 +233,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
+            <div className="m3-card-asymmetric bg-white dark:bg-[#121824] p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
               <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl w-fit mb-2">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
@@ -233,7 +243,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
+            <div className="m3-card-asymmetric bg-white dark:bg-[#121824] p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
               <div className="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl w-fit mb-2">
                 <Flame className="w-4 h-4" />
               </div>
@@ -243,7 +253,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#121824] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
+            <div className="m3-card-asymmetric bg-white dark:bg-[#121824] p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
               <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl w-fit mb-2">
                 <TrendingUp className="w-4 h-4" />
               </div>
@@ -302,8 +312,8 @@ export default function App() {
       <header className="px-6 pt-8 pb-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div>
-            <p className="text-slate-500 dark:text-gray-400 text-xs font-semibold tracking-wide uppercase">{format(new Date(), 'EEEE, MMMM do')}</p>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-0.5 flex items-center gap-2">
+            <p className="m3-badge-asymmetric text-slate-500 dark:text-gray-400 text-xs font-semibold tracking-wide uppercase px-3 py-1 bg-slate-200/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 w-fit">{format(new Date(), 'EEEE, MMMM do')}</p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-1 flex items-center gap-2">
               <span className="text-slate-900 dark:text-white">Habit Tracker</span>
               <Sparkles className="w-5 h-5 text-teal-500 dark:text-cyan-400 opacity-80" />
             </h1>
@@ -402,7 +412,7 @@ export default function App() {
               </section>
 
               {/* Daily Goal Card */}
-              <section className="bg-white dark:bg-[#121824] rounded-3xl p-6 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center gap-6">
+              <section className="m3-card-asymmetric bg-white dark:bg-[#121824] p-6 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center gap-6">
                 <div className="absolute top-1/2 left-12 -translate-y-1/2 w-32 h-32 bg-cyan-500/15 rounded-full blur-[50px] pointer-events-none" />
                 
                 <div className="flex-shrink-0">
@@ -624,11 +634,13 @@ export default function App() {
 
           <button
             onClick={() => handleOpenForm()}
-            className="flex items-center gap-1 bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs px-3.5 py-2 rounded-full shadow-sm active:scale-95 transition-all"
+            className={`flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-sm active:scale-95 transition-all m3-fab-morph ${
+              isScrolled ? 'is-scrolled px-3 py-2.5' : 'px-3.5 py-2'
+            }`}
             title="Create new habit"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add</span>
+            <span className={isScrolled ? 'hidden' : 'hidden sm:inline'}>Add</span>
           </button>
         </nav>
       </div>

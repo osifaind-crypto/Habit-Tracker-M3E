@@ -35,14 +35,14 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ scale: 1.01 }}
-      className={`relative rounded-[32px] p-4 sm:p-5 flex items-center gap-3 sm:gap-4 transition-all duration-300 m3-card-press ${
+      className={`relative p-4 sm:p-5 flex items-center gap-3 sm:gap-4 m3-card-press m3-habit-card ${
         completed
-          ? 'm3-active-card bg-slate-100/80 dark:bg-[#1a1f2c]'
-          : 'gemini-card bg-white dark:bg-[#1a1f2c]'
+          ? 'is-completed m3-active-card m3-primary-container'
+          : 'm3-card-asymmetric m3-secondary-container m3-idle-state'
       }`}
       style={{
-        boxShadow: completed ? `0 0 18px -4px ${habit.color}35` : undefined,
-        border: `1px solid ${completed ? `${habit.color}60` : 'rgba(255, 255, 255, 0.08)'}`,
+        boxShadow: completed ? `0 0 18px -4px ${habit.color || '#00f2fe'}35` : undefined,
+        border: `1px solid ${completed ? `${habit.color || '#00f2fe'}60` : 'rgba(255, 255, 255, 0.08)'}`,
       }}
     >
       {dragControls && (
@@ -57,13 +57,13 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
 
       <button
         onClick={onToggle}
-        className={`shrink-0 flex items-center justify-center m3-completion-toggle transition-all duration-300 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-          completed ? 'is-checked rounded-full' : 'rounded-2xl'
+        className={`shrink-0 flex items-center justify-center m3-completion-toggle transition-all duration-300 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f2fe]/50 ${
+          completed ? 'is-checked rounded-full m3-primary-bg' : 'rounded-2xl bg-[#121620] border border-white/10 hover:border-[#00f2fe]/40'
         }`}
         style={{
           width: '48px',
           height: '48px',
-          backgroundColor: completed ? habit.color : 'rgba(148, 163, 184, 0.2)',
+          backgroundColor: completed ? habit.color : undefined,
         }}
       >
         <motion.div
@@ -71,24 +71,24 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
           animate={{ scale: completed ? 1 : 0, opacity: completed ? 1 : 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         >
-          <Check className="w-6 h-6 text-white" />
+          <Check className="w-6 h-6 text-[#002533]" />
         </motion.div>
       </button>
 
       <div className="flex-1 min-w-0">
-        <h3 className="text-lg font-semibold truncate text-slate-900 dark:text-white">
+        <h3 className={`m3-title-large m3-habit-title truncate ${completed ? 'is-completed text-white/50' : 'text-white/95'}`}>
           {habit.title}
         </h3>
-        <div className="flex items-center gap-2 mt-1 text-sm text-slate-500 dark:text-gray-400 flex-wrap">
-          <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-gray-300 truncate">
+        <div className="flex items-center gap-2 mt-1 m3-body-medium text-sm font-normal text-slate-400 flex-wrap">
+          <span className="flex items-center gap-1 font-medium text-white/65 dark:text-white/65 truncate">
             <span>{categoryDef.icon}</span>
             <span>{habit.category}</span>
           </span>
           <span>•</span>
-          <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${
-            habit.priority === 'high' ? 'bg-red-500/15 text-red-600 dark:text-red-400' :
-            habit.priority === 'medium' ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' :
-            'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+          <span className={`m3-label-small m3-badge-asymmetric text-xs font-bold uppercase tracking-wider px-2 py-0.5 ${
+            habit.priority === 'high' ? 'bg-red-500/15 text-red-400' :
+            habit.priority === 'medium' ? 'bg-amber-500/15 text-amber-400' :
+            'bg-emerald-500/15 text-emerald-400'
           }`}>
             {habit.priority || 'medium'}
           </span>
@@ -102,10 +102,10 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
                     e.stopPropagation();
                     setIsStreakExpanded(!isStreakExpanded);
                   }}
-                  className={`streak-badge flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full text-xs transition-all cursor-pointer border active:scale-95 ${
+                  className={`streak-badge m3-tertiary-container flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full text-xs transition-all cursor-pointer border active:scale-95 ${
                     isHotStreak
-                      ? 'text-amber-500 dark:text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
-                      : 'text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20'
+                      ? 'text-purple-200 bg-[#c084fc]/20 hover:bg-[#c084fc]/30 border-[#c084fc]/40 shadow-[0_0_12px_rgba(192,132,252,0.3)]'
+                      : 'text-purple-300 bg-[#c084fc]/15 hover:bg-[#c084fc]/25 border-[#c084fc]/30 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
                   }`}
                   title={isHotStreak ? "Hot streak! (>3 days) Click to view streak start date" : "Click to view streak start date"}
                 >
@@ -120,7 +120,7 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
                     <Flame
                       className={`w-3.5 h-3.5 ${
                         isHotStreak
-                          ? 'text-amber-400 fill-amber-400/40 animate-flame-flicker'
+                          ? 'text-amber-400 fill-amber-400/40 animate-flame-flicker m3-streak-bounce'
                           : 'text-amber-500 dark:text-amber-400 fill-amber-400/20'
                       }`}
                     />

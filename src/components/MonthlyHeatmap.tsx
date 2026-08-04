@@ -66,7 +66,7 @@ export const MonthlyHeatmap: React.FC<MonthlyHeatmapProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-[#121824] rounded-3xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-xl transition-colors relative">
+    <div className="m3-card-asymmetric bg-white dark:bg-[#121824] p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-xl transition-colors relative">
       {/* Header Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
