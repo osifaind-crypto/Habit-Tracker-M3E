@@ -72,6 +72,94 @@
       --color-text-primary: rgba(255, 255, 255, 0.95);
       --color-text-secondary: rgba(255, 255, 255, 0.65);
       --color-text-muted: rgba(255, 255, 255, 0.38);
+
+      /* Module 1: Material 3 HCT Tonal Palette Accent Mappings */
+      --m3-tonal-health-container: rgba(0, 242, 254, 0.12);
+      --m3-tonal-health-text: #70f3ff;
+      --m3-tonal-health-rim: rgba(0, 242, 254, 0.3);
+
+      --m3-tonal-mind-container: rgba(192, 132, 252, 0.12);
+      --m3-tonal-mind-text: #e9d5ff;
+      --m3-tonal-mind-rim: rgba(192, 132, 252, 0.3);
+
+      --m3-tonal-energy-container: rgba(255, 159, 28, 0.12);
+      --m3-tonal-energy-text: #ffedd5;
+      --m3-tonal-energy-rim: rgba(255, 159, 28, 0.3);
+
+      --m3-tonal-work-container: rgba(59, 130, 246, 0.12);
+      --m3-tonal-work-text: #bfdbfe;
+      --m3-tonal-work-rim: rgba(59, 130, 246, 0.3);
+    }
+
+    /* Category Tag Card Tinting Classes */
+    .m3-tint-health, [data-m3-category="Health"] {
+      --m3-card-bg: rgba(0, 242, 254, 0.12);
+      --m3-card-text: #70f3ff;
+      --m3-card-rim: rgba(0, 242, 254, 0.3);
+      background-color: var(--m3-card-bg) !important;
+      border-color: var(--m3-card-rim) !important;
+    }
+    .m3-tint-mind, [data-m3-category="Mind"] {
+      --m3-card-bg: rgba(192, 132, 252, 0.12);
+      --m3-card-text: #e9d5ff;
+      --m3-card-rim: rgba(192, 132, 252, 0.3);
+      background-color: var(--m3-card-bg) !important;
+      border-color: var(--m3-card-rim) !important;
+    }
+    .m3-tint-energy, [data-m3-category="Energy"] {
+      --m3-card-bg: rgba(255, 159, 28, 0.12);
+      --m3-card-text: #ffedd5;
+      --m3-card-rim: rgba(255, 159, 28, 0.3);
+      background-color: var(--m3-card-bg) !important;
+      border-color: var(--m3-card-rim) !important;
+    }
+    .m3-tint-work, [data-m3-category="Work"] {
+      --m3-card-bg: rgba(59, 130, 246, 0.12);
+      --m3-card-text: #bfdbfe;
+      --m3-card-rim: rgba(59, 130, 246, 0.3);
+      background-color: var(--m3-card-bg) !important;
+      border-color: var(--m3-card-rim) !important;
+    }
+
+    /* Overscroll Physics & Elastic Dynamic Motion */
+    html, body {
+      overscroll-behavior-y: contain;
+    }
+
+    .m3-scroll-container {
+      overscroll-behavior-y: contain;
+      transition: transform 300ms cubic-bezier(0.2, 0.0, 0.0, 1.0);
+    }
+
+    /* Module 3: Container Transform Shared Element Expansion */
+    .m3-morph-tray {
+      transition: all 400ms cubic-bezier(0.2, 0.0, 0.0, 1.0);
+    }
+    .m3-morph-tray.is-expanded {
+      border-top-left-radius: 36px !important;
+      border-top-right-radius: 36px !important;
+      border-bottom-left-radius: 28px !important;
+      border-bottom-right-radius: 28px !important;
+      box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.85), 0 0 32px rgba(0, 242, 254, 0.25) !important;
+    }
+
+    /* Module 5: Touch Targets & High-Contrast Tokens */
+    .m3-touch-target {
+      min-width: 48px;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Reduced Motion Accessibility Fallback */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
     }
 
     /* Material 3 Color Role Utility Classes */
@@ -1458,15 +1546,54 @@
       );
     }
 
-    // Habit Card Component
-    function HabitCard({ habit, completions, onToggle, onEdit, onDelete, index, onDragStart, onDragOver, onDrop, isDragging }) {
+    // Helper for Module 1: Material 3 HCT Category Tonal Palette Mappings
+    function getM3CategoryPalette(category) {
+      const cat = (category || '').toLowerCase();
+      if (cat.includes('health') || cat.includes('fitness')) {
+        return {
+          name: 'Health',
+          container: 'rgba(0, 242, 254, 0.12)',
+          text: '#70f3ff',
+          rim: 'rgba(0, 242, 254, 0.3)',
+          tintClass: 'm3-tint-health',
+        };
+      } else if (cat.includes('mind') || cat.includes('mindfulness') || cat.includes('learn')) {
+        return {
+          name: 'Mind',
+          container: 'rgba(192, 132, 252, 0.12)',
+          text: '#e9d5ff',
+          rim: 'rgba(192, 132, 252, 0.3)',
+          tintClass: 'm3-tint-mind',
+        };
+      } else if (cat.includes('energy') || cat.includes('personal') || cat.includes('life') || cat.includes('finance')) {
+        return {
+          name: 'Energy',
+          container: 'rgba(255, 159, 28, 0.12)',
+          text: '#ffedd5',
+          rim: 'rgba(255, 159, 28, 0.3)',
+          tintClass: 'm3-tint-energy',
+        };
+      } else {
+        return {
+          name: 'Work',
+          container: 'rgba(59, 130, 246, 0.12)',
+          text: '#bfdbfe',
+          rim: 'rgba(59, 130, 246, 0.3)',
+          tintClass: 'm3-tint-work',
+        };
+      }
+    }
+
+    // Habit Card Component with Modules 1, 3 & 5
+    function HabitCard({ habit, completions, onToggle, onEdit, onDelete, index, onDragStart, onDragOver, onDrop, isDragging, onOpenHistoricalLog }) {
       const [showMenu, setShowMenu] = useState(false);
-      const [isStreakExpanded, setIsStreakExpanded] = useState(false);
+      const [isTrayExpanded, setIsTrayExpanded] = useState(false);
       const completed = isCompletedToday(habit.id, completions);
       const streakInfo = getStreakStartDate(habit.id, completions);
       const isHotStreak = streakInfo.streak > 3;
       const consistencyScore = calculateConsistencyScore(habit, completions);
       const categoryDef = CategoryManager.getCategoryByName(habit.category);
+      const m3Palette = getM3CategoryPalette(habit.category);
 
       return (
         <div
@@ -1474,157 +1601,189 @@
           onDragStart={(e) => onDragStart && onDragStart(e, index)}
           onDragOver={(e) => onDragOver && onDragOver(e, index)}
           onDrop={(e) => onDrop && onDrop(e, index)}
-          className={`relative gemini-card p-4 flex items-center justify-between border transition-all shadow-lg group animate-fade-in m3-card-press m3-habit-card ${
+          data-m3-category={m3Palette.name}
+          style={{
+            '--m3-card-bg': m3Palette.container,
+            '--m3-card-text': m3Palette.text,
+            '--m3-card-rim': m3Palette.rim,
+          }}
+          className={`relative gemini-card p-4 flex flex-col border transition-all shadow-lg group animate-fade-in m3-card-press m3-habit-card m3-morph-tray ${
+            isTrayExpanded ? 'is-expanded border-[#00f2fe]/50 shadow-[0_20px_50px_rgba(0,242,254,0.25)]' : ''
+          } ${
             completed ? 'is-completed m3-active-card border-[#80d4ff]/40' : 'm3-card-asymmetric border-[#253045]'
-          } ${isDragging ? 'opacity-40 border-[#80d4ff] scale-[0.98]' : ''}`}
+          } ${isDragging ? 'opacity-40 border-[#80d4ff] scale-[0.98]' : ''} ${m3Palette.tintClass}`}
         >
-          <div className="flex items-center gap-3.5 flex-1 min-w-0 pr-2">
-            <div
-              className="p-1 cursor-grab active:cursor-grabbing text-teal-200/40 hover:text-[#80d4ff] transition-colors shrink-0 -ml-1"
-              title="Drag handle to reorder priority"
-            >
-              <IconGrip />
+          {/* Main Habit Header Row */}
+          <div className="flex items-center justify-between gap-3.5 w-full">
+            <div className="flex items-center gap-3.5 flex-1 min-w-0">
+              <div
+                className="p-2 m3-touch-target cursor-grab active:cursor-grabbing text-teal-200/40 hover:text-[#00f2fe] transition-colors shrink-0 -ml-1"
+                title="Drag handle to reorder priority"
+              >
+                <IconGrip />
+              </div>
+
+              {/* Expressive completion toggle with pulse halo and 48px touch target */}
+              <button
+                onClick={onToggle}
+                className={`w-12 h-12 m3-completion-toggle m3-touch-target flex items-center justify-center transition-all duration-300 focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none shrink-0 active:scale-90 hover:scale-105 ${
+                  completed
+                    ? 'is-checked rounded-full bg-gradient-to-tr from-[#00f2fe] to-[#00a8ff] text-slate-950 shadow-[0_0_24px_rgba(0,242,254,0.5)]'
+                    : 'rounded-2xl bg-[#001220] border border-white/10 text-transparent hover:border-[#00f2fe]/60'
+                }`}
+                style={completed && habit.color ? { backgroundColor: habit.color } : {}}
+              >
+                <IconCheck />
+              </button>
+
+              <div className="min-w-0 flex-1 cursor-pointer" onClick={() => setIsTrayExpanded(!isTrayExpanded)}>
+                <h3 className={`m3-title-large m3-habit-title truncate transition-all ${completed ? 'is-completed text-white/50' : 'text-white/95'}`}>
+                  {habit.title}
+                </h3>
+                <div className="flex items-center gap-2 mt-1 m3-body-medium text-sm font-normal text-slate-400 flex-wrap">
+                  <span className="flex items-center gap-1 font-semibold truncate" style={{ color: m3Palette.text }}>
+                    <span>{categoryDef.icon}</span>
+                    <span>{habit.category}</span>
+                  </span>
+                  <span>•</span>
+                  <span className={`m3-label-small m3-badge-asymmetric text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 border ${
+                    habit.priority === 'high' ? 'bg-rose-500/15 text-rose-300 border-rose-500/30' :
+                    habit.priority === 'medium' ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' :
+                    'bg-teal-500/15 text-teal-300 border-teal-500/30'
+                  }`}>
+                    {habit.priority || 'medium'}
+                  </span>
+                  {streakInfo.streak > 0 && (
+                    <>
+                      <span>•</span>
+                      <span className="flex items-center gap-1 text-amber-300 text-xs font-extrabold bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
+                        <IconFlame className={`w-3.5 h-3.5 ${isHotStreak ? 'text-amber-400 animate-flame-flicker' : 'text-amber-400/70'}`} />
+                        <span>{streakInfo.streak}d streak</span>
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
 
-            <button
-              onClick={onToggle}
-              className={`w-11 h-11 m3-completion-toggle flex items-center justify-center transition-all duration-300 focus:outline-none shrink-0 active:scale-90 hover:scale-105 ${
-                completed
-                  ? 'is-checked rounded-full bg-gradient-to-tr from-[#80d4ff] to-[#00b4d8] text-slate-950 shadow-[0_0_20px_rgba(128,212,255,0.5)]'
-                  : 'rounded-2xl bg-[#121620] border border-white/10 text-transparent hover:border-[#80d4ff]/60'
-              }`}
-              style={completed && habit.color ? { backgroundColor: habit.color } : {}}
-            >
-              <IconCheck />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setIsTrayExpanded(!isTrayExpanded)}
+                className="p-2.5 m3-touch-target rounded-full hover:bg-white/10 text-teal-200/70 hover:text-white transition-all active:scale-95 focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none"
+                title={isTrayExpanded ? "Collapse detail tray" : "Expand detail tray"}
+              >
+                <span className={`transition-transform duration-300 inline-block text-xs font-bold ${isTrayExpanded ? 'rotate-180 text-[#00f2fe]' : ''}`}>▼</span>
+              </button>
 
-            <div className="min-w-0 flex-1">
-              <h3 className={`m3-title-large m3-habit-title truncate transition-all ${completed ? 'is-completed text-white/50' : 'text-white/95'}`}>
-                {habit.title}
-              </h3>
-              <div className="flex items-center gap-2 mt-1 m3-body-medium text-sm font-normal text-slate-400 flex-wrap">
-                <span className="flex items-center gap-1 font-medium text-white/65 truncate">
-                  <span>{categoryDef.icon}</span>
-                  <span>{habit.category}</span>
-                </span>
-                <span>•</span>
-                <span className={`m3-label-small m3-badge-asymmetric text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 border ${
-                  habit.priority === 'high' ? 'bg-rose-500/15 text-rose-300 border-rose-500/30' :
-                  habit.priority === 'medium' ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' :
-                  'bg-teal-500/15 text-teal-300 border-teal-500/30'
-                }`}>
-                  {habit.priority || 'medium'}
-                </span>
-                {streakInfo.streak > 0 && (
-                  <>
-                    <span>•</span>
-                    <div className="relative inline-block">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsStreakExpanded(!isStreakExpanded);
-                        }}
-                        className={`streak-badge m3-tertiary-container flex items-center gap-1 font-semibold px-2.5 py-0.5 rounded-full text-xs transition-all cursor-pointer border active:scale-95 ${
-                          isHotStreak
-                            ? 'text-purple-200 bg-[#c084fc]/20 hover:bg-[#c084fc]/30 border-[#c084fc]/40 shadow-[0_0_12px_rgba(192,132,252,0.3)]'
-                            : 'text-purple-300 bg-[#c084fc]/15 hover:bg-[#c084fc]/25 border-[#c084fc]/30 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
-                        }`}
-                        title={isHotStreak ? "Hot streak! (>3 days) Click to view streak start date" : "Click to view streak start date"}
-                      >
-                        <div className="relative flex items-center justify-center">
-                          {isHotStreak && (
-                            <div className="absolute inset-0 pointer-events-none flex items-center justify-center" aria-hidden="true">
-                              <span className="absolute w-1 h-1 rounded-full bg-amber-300 flame-spark-1" />
-                              <span className="absolute w-1 h-1 rounded-full bg-orange-400 flame-spark-2" />
-                              <span className="absolute w-1 h-1 rounded-full bg-yellow-200 flame-spark-3" />
-                            </div>
-                          )}
-                          <IconFlame
-                            className={`w-3.5 h-3.5 ${
-                              isHotStreak
-                                ? 'text-amber-400 fill-amber-400/40 animate-flame-flicker m3-streak-bounce'
-                                : 'text-amber-400 fill-amber-400/20'
-                            }`}
-                          />
-                        </div>
-                        <span>{streakInfo.streak}d</span>
-                        <span className={`text-[9px] transition-transform duration-200 inline-block ${isStreakExpanded ? 'rotate-180' : ''}`}>▼</span>
-                      </button>
-
-                      {isStreakExpanded && (
-                        <>
-                          <div
-                            className="fixed inset-0 z-10"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setIsStreakExpanded(false);
-                            }}
-                          />
-                          <div
-                            className="streak-detail-view origin-top-left absolute left-0 top-full mt-2 z-30 min-w-[195px] bg-[#001c30] border border-amber-500/40 rounded-2xl p-3.5 shadow-2xl text-xs text-teal-100 space-y-1.5 animate-fade-in backdrop-blur-md"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <div className="flex items-center gap-1.5 font-bold text-amber-300 pb-1.5 border-b border-white/10">
-                              <div className="relative flex items-center justify-center">
-                                {isHotStreak && (
-                                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center" aria-hidden="true">
-                                    <span className="absolute w-1 h-1 rounded-full bg-amber-300 flame-spark-1" />
-                                    <span className="absolute w-1 h-1 rounded-full bg-orange-400 flame-spark-2" />
-                                  </div>
-                                )}
-                                <IconFlame
-                                  className={`w-4 h-4 ${
-                                    isHotStreak
-                                      ? 'text-amber-400 fill-amber-400/40 animate-flame-flicker'
-                                      : 'text-amber-400 fill-amber-400/20'
-                                  }`}
-                                />
-                              </div>
-                              <span>Streak Overview</span>
-                              {isHotStreak && (
-                                <span className="ml-auto text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                                  Hot 🔥
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex justify-between items-center text-teal-200 pt-0.5">
-                              <span className="text-teal-200/60">Current Streak:</span>
-                              <span className="font-semibold text-white">{streakInfo.streak} {streakInfo.streak === 1 ? 'day' : 'days'}</span>
-                            </div>
-                            <div className="flex justify-between items-center text-teal-200">
-                              <span className="text-teal-200/60">Started on:</span>
-                              <span className="font-semibold text-amber-300">{streakInfo.formattedStartDate || 'N/A'}</span>
-                            </div>
-                            <div className="flex justify-between items-center text-teal-200 pt-1 border-t border-white/10">
-                              <span className="text-teal-200/60">Consistency:</span>
-                              <span className="font-semibold text-[#00f2fe]">{consistencyScore}%</span>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </>
+              <div className="relative">
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="p-2.5 m3-touch-target rounded-xl text-teal-200/60 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none"
+                >
+                  <IconMore />
+                </button>
+                {showMenu && (
+                  <div className="absolute right-0 mt-2 w-36 bg-[#001c30] rounded-2xl shadow-2xl border border-[#00f2fe]/30 py-1.5 z-20 animate-fade-in backdrop-blur-md">
+                    <button onClick={() => { setShowMenu(false); onEdit(); }} className="w-full text-left px-4 py-2.5 text-xs font-semibold text-teal-100 hover:bg-[#002b4a] hover:text-[#00f2fe] flex items-center gap-2 m3-touch-target">
+                      <IconEdit /> Edit
+                    </button>
+                    <button onClick={() => { setShowMenu(false); onDelete(); }} className="w-full text-left px-4 py-2.5 text-xs font-semibold text-rose-300 hover:bg-rose-500/15 flex items-center gap-2 m3-touch-target">
+                      <IconTrash /> Delete
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="relative">
-            <button onClick={() => setShowMenu(!showMenu)} className="p-2 rounded-xl text-teal-200/60 hover:text-white hover:bg-white/10 transition-colors">
-              <IconMore />
-            </button>
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-36 bg-[#001c30] rounded-2xl shadow-2xl border border-[#00f2fe]/30 py-1.5 z-20 animate-fade-in backdrop-blur-md">
-                <button onClick={() => { setShowMenu(false); onEdit(); }} className="w-full text-left px-4 py-2 text-xs font-semibold text-teal-100 hover:bg-[#002b4a] hover:text-[#00f2fe] flex items-center gap-2">
-                  <IconEdit /> Edit
+          {/* Module 3: Container Transform Shared Element Expansion Tray */}
+          {isTrayExpanded && (
+            <div className="mt-4 pt-4 border-t border-white/10 space-y-4 animate-fade-in">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="bg-[#001220]/80 p-3 rounded-2xl border border-white/5">
+                  <span className="text-teal-200/60 block text-[11px] font-medium">Current Streak</span>
+                  <span className="text-amber-300 font-extrabold text-sm flex items-center gap-1 mt-0.5">
+                    <IconFlame className="w-3.5 h-3.5" />
+                    {streakInfo.streak} {streakInfo.streak === 1 ? 'day' : 'days'}
+                  </span>
+                </div>
+                <div className="bg-[#001220]/80 p-3 rounded-2xl border border-white/5">
+                  <span className="text-teal-200/60 block text-[11px] font-medium">Streak Started</span>
+                  <span className="text-white font-bold text-xs mt-0.5 block truncate">
+                    {streakInfo.formattedStartDate || 'Not active'}
+                  </span>
+                </div>
+                <div className="bg-[#001220]/80 p-3 rounded-2xl border border-white/5">
+                  <span className="text-teal-200/60 block text-[11px] font-medium">Consistency Score</span>
+                  <span className="text-[#00f2fe] font-extrabold text-sm mt-0.5 block">
+                    {consistencyScore}%
+                  </span>
+                </div>
+                <div className="bg-[#001220]/80 p-3 rounded-2xl border border-white/5">
+                  <span className="text-teal-200/60 block text-[11px] font-medium">Category Accent</span>
+                  <span className="font-extrabold text-xs mt-0.5 block capitalize" style={{ color: m3Palette.text }}>
+                    {habit.category}
+                  </span>
+                </div>
+              </div>
+
+              {/* Consistency Rate Bar */}
+              <div>
+                <div className="flex justify-between items-center text-xs mb-1">
+                  <span className="text-teal-200/70 font-semibold">30-Day Consistency Rate</span>
+                  <span className="text-[#00f2fe] font-bold">{consistencyScore}%</span>
+                </div>
+                <div className="w-full bg-[#001220] h-2.5 rounded-full overflow-hidden border border-white/5">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#00f2fe] to-[#80d4ff] rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(0,242,254,0.5)]"
+                    style={{ width: `${consistencyScore}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Contextual Quick Actions */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <button
+                  onClick={onToggle}
+                  className={`flex-1 m3-touch-target min-h-[48px] px-4 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none ${
+                    completed
+                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30'
+                      : 'bg-[#00f2fe]/20 text-[#00f2fe] border border-[#00f2fe]/40 hover:bg-[#00f2fe]/30 shadow-[0_0_15px_rgba(0,242,254,0.3)]'
+                  }`}
+                >
+                  <IconCheck />
+                  <span>{completed ? 'Mark Incomplete' : 'Complete Today'}</span>
                 </button>
-                <button onClick={() => { setShowMenu(false); onDelete(); }} className="w-full text-left px-4 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/15 flex items-center gap-2">
-                  <IconTrash /> Delete
+
+                {onOpenHistoricalLog && (
+                  <button
+                    onClick={() => onOpenHistoricalLog(habit.id)}
+                    className="m3-touch-target min-h-[48px] px-4 py-2.5 rounded-xl bg-purple-500/20 text-purple-200 border border-purple-500/30 hover:bg-purple-500/30 font-bold text-xs flex items-center gap-2 transition-all active:scale-95 focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none"
+                    title="Log past date completion"
+                  >
+                    <IconCalendar />
+                    <span>Back-Date Log</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={onEdit}
+                  className="m3-touch-target min-h-[48px] px-4 py-2.5 rounded-xl bg-white/10 text-teal-100 hover:bg-white/20 font-bold text-xs flex items-center gap-2 transition-all active:scale-95 focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none"
+                >
+                  <IconEdit />
+                  <span>Edit</span>
+                </button>
+
+                <button
+                  onClick={onDelete}
+                  className="m3-touch-target min-h-[48px] px-3 py-2.5 rounded-xl bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 font-bold text-xs flex items-center justify-center transition-all active:scale-95 focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none"
+                  title="Delete habit"
+                >
+                  <IconTrash />
                 </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       );
     }
@@ -1944,9 +2103,48 @@
       }, [data]);
 
       const [activeTab, setActiveTab] = useState('tasks');
+      const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All');
       const [isFormOpen, setIsFormOpen] = useState(false);
       const [isSettingsOpen, setIsSettingsOpen] = useState(false);
       const [editingHabit, setEditingHabit] = useState(null);
+
+      // Module 4: Overscroll & Scroll Parallax State
+      const [scrollY, setScrollY] = useState(0);
+      const [overscrollY, setOverscrollY] = useState(0);
+
+      useEffect(() => {
+        let touchStartY = 0;
+        const handleScroll = () => {
+          setScrollY(window.scrollY);
+        };
+        const handleTouchStart = (e) => {
+          touchStartY = e.touches[0].clientY;
+        };
+        const handleTouchMove = (e) => {
+          const currentY = e.touches[0].clientY;
+          const diff = currentY - touchStartY;
+          if (window.scrollY <= 0 && diff > 0) {
+            setOverscrollY(Math.min(diff * 0.15, 20));
+          } else {
+            setOverscrollY(0);
+          }
+        };
+        const handleTouchEnd = () => {
+          setOverscrollY(0);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        window.addEventListener('touchstart', handleTouchStart, { passive: true });
+        window.addEventListener('touchmove', handleTouchMove, { passive: true });
+        window.addEventListener('touchend', handleTouchEnd, { passive: true });
+        return () => {
+          window.removeEventListener('scroll', handleScroll);
+          window.removeEventListener('touchstart', handleTouchStart);
+          window.removeEventListener('touchmove', handleTouchMove);
+          window.removeEventListener('touchend', handleTouchEnd);
+        };
+      }, []);
+
       const [summarySections, setSummarySections] = useState(() => {
         try {
           const saved = localStorage.getItem('summaries_layout_config');
@@ -2101,7 +2299,7 @@
       const handleDrop = (e, targetIdx) => {
         e.preventDefault();
         if (draggedIdx === null || draggedIdx === targetIdx) return;
-        const updated = [...sortedHabits];
+        const updated = [...filteredHabits];
         const [moved] = updated.splice(draggedIdx, 1);
         updated.splice(targetIdx, 0, moved);
         reorderHabits(updated);
@@ -2117,14 +2315,20 @@
         return Math.max(...data.habits.map(h => calculateStreak(h.id, data.completions)), 0);
       }, [data.habits, data.completions]);
 
-      const sortedHabits = data.habits;
+      const filteredHabits = useMemo(() => {
+        if (selectedCategoryFilter === 'All') return data.habits;
+        return data.habits.filter(h => h.category.toLowerCase() === selectedCategoryFilter.toLowerCase());
+      }, [data.habits, selectedCategoryFilter]);
 
       const formattedToday = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
       return (
-        <div className="min-h-screen bg-[#000c14] text-teal-50 pb-32 relative overflow-hidden">
-          {/* Ambient Organic Background Glows */}
-          <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-96 bg-gradient-to-b from-[#00507a]/30 via-[#00203a]/20 to-transparent blur-3xl pointer-events-none -z-10 animate-gemini-glow" />
+        <div className="min-h-screen bg-[#000c14] text-teal-50 pb-36 relative overflow-hidden m3-scroll-container" style={{ transform: overscrollY > 0 ? `scaleY(${1 + overscrollY * 0.003})` : 'scaleY(1)' }}>
+          {/* Module 4: Parallax Ambient Radial Light Background Gels */}
+          <div
+            className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-96 bg-gradient-to-b from-[#00507a]/30 via-[#00203a]/20 to-transparent blur-3xl pointer-events-none -z-10 animate-gemini-glow transition-transform duration-300"
+            style={{ transform: `translate(-50%, ${scrollY * -0.08}px)` }}
+          />
 
           <header className="px-6 pt-8 pb-4">
             <div className="max-w-2xl mx-auto flex items-center justify-between">
@@ -2138,7 +2342,11 @@
                   <IconGeminiStar className="w-6 h-6 text-[#00f2fe] animate-pulse" />
                 </h1>
               </div>
-              <button onClick={() => setIsSettingsOpen(true)} className="w-10 h-10 rounded-2xl bg-[#001729] hover:bg-[#00243d] flex items-center justify-center text-teal-200 hover:text-white transition-all border border-[#00f2fe]/20 active:scale-95 shadow-[0_0_15px_rgba(0,242,254,0.1)]">
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="w-12 h-12 m3-touch-target rounded-2xl bg-[#001729] hover:bg-[#00243d] flex items-center justify-center text-teal-200 hover:text-white transition-all border border-[#00f2fe]/20 active:scale-95 shadow-[0_0_15px_rgba(0,242,254,0.1)] focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none"
+                title="Open Settings"
+              >
                 <IconSettings />
               </button>
             </div>
@@ -2150,27 +2358,56 @@
                 <DailyMotivation />
 
                 <section>
-                  <div className="flex items-center justify-between mb-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                     <h2 className="m3-headline-medium text-2xl font-semibold tracking-normal text-white/95 flex items-center gap-2">
                       Today's Tasks
                       <IconGeminiStar className="w-4 h-4 text-[#80d4ff]" />
                     </h2>
+
+                    {/* Module 2: Category Filter Segmented Control */}
+                    <div className="relative p-1 rounded-full bg-[rgba(18,26,36,0.85)] border border-[#00f2fe]/20 backdrop-blur-md flex items-center gap-1 overflow-x-auto no-scrollbar">
+                      {['All', 'Health', 'Mind', 'Energy', 'Work'].map((cat) => {
+                        const isSelected = selectedCategoryFilter.toLowerCase() === cat.toLowerCase();
+                        const palette = getM3CategoryPalette(cat);
+                        return (
+                          <button
+                            key={cat}
+                            onClick={() => setSelectedCategoryFilter(cat)}
+                            className={`relative z-10 px-3.5 py-2.5 rounded-full text-xs font-bold transition-all min-h-[48px] min-w-[65px] flex items-center justify-center gap-1 active:scale-95 focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none ${
+                              isSelected
+                                ? 'bg-[#00f2fe]/25 text-white border border-[#00f2fe]/40 shadow-[0_0_15px_rgba(0,242,254,0.35)]'
+                                : 'text-teal-200/60 hover:text-white hover:bg-white/5 m3-unselected'
+                            }`}
+                            style={isSelected && cat !== 'All' ? { backgroundColor: palette.container, color: palette.text, borderColor: palette.rim } : {}}
+                          >
+                            <span>{cat}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <div className="space-y-4">
-                    {data.habits.length === 0 ? (
+                    {filteredHabits.length === 0 ? (
                       <div className="text-center py-12 px-6 gemini-card rounded-3xl border border-[#00f2fe]/20 border-dashed">
                         <div className="w-16 h-16 bg-[#001a2e] rounded-full flex items-center justify-center mx-auto mb-4 text-[#00f2fe] shadow-[0_0_20px_rgba(0,242,254,0.2)]">
                           <IconGeminiStar className="w-8 h-8" />
                         </div>
-                        <h3 className="text-white font-bold mb-2">No habits created yet</h3>
-                        <p className="text-teal-200/60 text-sm mb-6 max-w-xs mx-auto">Start building a higher-performing routine by adding your first daily habit.</p>
-                        <button onClick={() => { setEditingHabit(null); setIsFormOpen(true); }} className="inline-flex items-center gap-2 bg-gradient-to-r from-[#00f2fe] to-[#00a8ff] text-slate-950 font-extrabold px-6 py-3.5 rounded-full shadow-[0_0_20px_rgba(0,242,254,0.4)] transition-all hover:scale-105 active:scale-95">
+                        <h3 className="text-white font-bold mb-2">No habits found</h3>
+                        <p className="text-teal-200/60 text-sm mb-6 max-w-xs mx-auto">
+                          {selectedCategoryFilter === 'All'
+                            ? 'Start building a higher-performing routine by adding your first daily habit.'
+                            : `No habits found under category "${selectedCategoryFilter}".`}
+                        </p>
+                        <button
+                          onClick={() => { setEditingHabit(null); setIsFormOpen(true); }}
+                          className="inline-flex items-center gap-2 bg-gradient-to-r from-[#00f2fe] to-[#00a8ff] text-slate-950 font-extrabold px-6 py-3.5 rounded-full shadow-[0_0_20px_rgba(0,242,254,0.4)] transition-all hover:scale-105 active:scale-95 m3-touch-target min-h-[48px] focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none"
+                        >
                           <IconPlus /> Create Habit
                         </button>
                       </div>
                     ) : (
-                      data.habits.map((habit, idx) => (
+                      filteredHabits.map((habit, idx) => (
                         <HabitCard
                           key={habit.id}
                           habit={habit}
@@ -2183,6 +2420,7 @@
                           onDragOver={handleDragOver}
                           onDrop={handleDrop}
                           isDragging={draggedIdx === idx}
+                          onOpenHistoricalLog={(id) => setHistoricalLogDate(todayStr)}
                         />
                       ))
                     )}
@@ -2229,14 +2467,14 @@
                     {isEditingLayout && (
                       <button
                         onClick={resetSummaryLayout}
-                        className="text-xs font-semibold text-teal-200/60 hover:text-white px-2.5 py-1.5 rounded-xl hover:bg-white/10 transition-colors"
+                        className="text-xs font-semibold text-teal-200/60 hover:text-white px-3 py-2 rounded-xl hover:bg-white/10 transition-colors m3-touch-target min-h-[48px]"
                       >
                         Reset
                       </button>
                     )}
                     <button
                       onClick={() => setIsEditingLayout(!isEditingLayout)}
-                      className={`text-xs font-bold px-3.5 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all ${
+                      className={`text-xs font-bold px-4 py-2.5 rounded-xl border flex items-center gap-1.5 transition-all m3-touch-target min-h-[48px] focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none ${
                         isEditingLayout
                           ? 'bg-[#00f2fe] text-slate-950 border-[#00f2fe] shadow-[0_0_15px_rgba(0,242,254,0.4)]'
                           : 'bg-[#001729] text-teal-100 border-[#00f2fe]/20 hover:bg-[#00243d]'
@@ -2275,20 +2513,20 @@
                             <button
                               onClick={() => moveSection(idx, 'up')}
                               disabled={idx === 0}
-                              className="p-1 rounded hover:bg-white/10 disabled:opacity-30 text-teal-200/60"
+                              className="p-2.5 m3-touch-target rounded hover:bg-white/10 disabled:opacity-30 text-teal-200/60"
                             >
                               ↑
                             </button>
                             <button
                               onClick={() => moveSection(idx, 'down')}
                               disabled={idx === summarySections.length - 1}
-                              className="p-1 rounded hover:bg-white/10 disabled:opacity-30 text-teal-200/60"
+                              className="p-2.5 m3-touch-target rounded hover:bg-white/10 disabled:opacity-30 text-teal-200/60"
                             >
                               ↓
                             </button>
                             <button
                               onClick={() => toggleSectionVisibility(sec.id)}
-                              className={`p-1.5 rounded transition-colors ${
+                              className={`p-2.5 m3-touch-target rounded transition-colors ${
                                 sec.visible ? 'text-[#00f2fe] hover:bg-white/10' : 'text-rose-300 bg-rose-500/10'
                               }`}
                               title={sec.visible ? 'Hide section' : 'Show section'}
@@ -2315,18 +2553,25 @@
             )}
           </main>
 
-          {/* Gemini Dynamic Floating Pill Bottom Navigation Bar */}
+          {/* Module 2: Segmented Pill Controls & Floating Navigation Dock */}
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[92vw]">
-            <nav className="gemini-pill-nav p-1.5 rounded-full shadow-[0_16px_48px_rgba(0,12,20,0.8)] flex items-center gap-1.5">
+            <nav className="relative p-1.5 rounded-full bg-[rgba(18,26,36,0.88)] backdrop-blur-2xl border border-[#00f2fe]/30 shadow-[0_16px_48px_rgba(0,12,20,0.85)] flex items-center gap-1.5 min-h-[56px]">
+              {/* Animated Sliding Pill Highlight Indicator */}
+              <div
+                className="absolute top-1.5 bottom-1.5 rounded-full bg-[#00f2fe]/20 border border-[#00f2fe]/40 shadow-[0_0_15px_rgba(0,242,254,0.35)] transition-transform duration-300 ease-out pointer-events-none"
+                style={{
+                  width: 'calc(44% - 10px)',
+                  transform: activeTab === 'tasks' ? 'translateX(0px)' : 'translateX(108px)',
+                }}
+              />
+
               <button
                 onClick={() => setActiveTab('tasks')}
-                className={`flex items-center gap-2 py-2.5 px-5 rounded-full text-xs font-bold transition-all ${
-                  activeTab === 'tasks' 
-                    ? 'bg-gradient-to-r from-[#00f2fe]/20 to-[#00a8ff]/20 text-[#00f2fe] border border-[#00f2fe]/40 shadow-[0_0_15px_rgba(0,242,254,0.3)]' 
-                    : 'text-teal-200/60 hover:text-white hover:bg-white/10'
+                className={`relative z-10 flex items-center justify-center gap-2 py-3 px-5 rounded-full text-xs font-bold transition-all min-h-[48px] m3-touch-target focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none ${
+                  activeTab === 'tasks' ? 'text-[#00f2fe]' : 'text-teal-200/60 hover:text-white m3-unselected'
                 }`}
               >
-                <IconGeminiStar className={`w-3.5 h-3.5 ${activeTab === 'tasks' ? 'text-[#00f2fe]' : 'text-teal-200/40'}`} />
+                <IconGeminiStar className={`w-4 h-4 ${activeTab === 'tasks' ? 'text-[#00f2fe]' : 'text-teal-200/40'}`} />
                 <span>Tasks</span>
                 {data.habits.length > 0 && (
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${activeTab === 'tasks' ? 'bg-[#00f2fe]/30 text-[#00f2fe]' : 'bg-[#001729] text-teal-200/60'}`}>
@@ -2337,20 +2582,19 @@
 
               <button
                 onClick={() => setActiveTab('summaries')}
-                className={`flex items-center gap-2 py-2.5 px-5 rounded-full text-xs font-bold transition-all ${
-                  activeTab === 'summaries' 
-                    ? 'bg-gradient-to-r from-[#00f2fe]/20 to-[#00a8ff]/20 text-[#00f2fe] border border-[#00f2fe]/40 shadow-[0_0_15px_rgba(0,242,254,0.3)]' 
-                    : 'text-teal-200/60 hover:text-white hover:bg-white/10'
+                className={`relative z-10 flex items-center justify-center gap-2 py-3 px-5 rounded-full text-xs font-bold transition-all min-h-[48px] m3-touch-target focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none ${
+                  activeTab === 'summaries' ? 'text-[#00f2fe]' : 'text-teal-200/60 hover:text-white m3-unselected'
                 }`}
               >
+                <IconAward className={`w-4 h-4 ${activeTab === 'summaries' ? 'text-[#00f2fe]' : 'text-teal-200/40'}`} />
                 <span>Summaries</span>
               </button>
 
-              <div className="h-5 w-px bg-[#00f2fe]/20 mx-0.5" />
+              <div className="h-6 w-px bg-[#00f2fe]/20 mx-1 relative z-10" />
 
               <button
                 onClick={() => { setEditingHabit(null); setIsFormOpen(true); }}
-                className="flex items-center gap-1.5 bg-gradient-to-r from-[#00f2fe] to-[#00a8ff] hover:opacity-95 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-full shadow-[0_0_20px_rgba(0,242,254,0.4)] active:scale-95 transition-all"
+                className="relative z-10 flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#00f2fe] to-[#00a8ff] hover:opacity-95 text-slate-950 font-extrabold text-xs px-5 py-3 rounded-full shadow-[0_0_20px_rgba(0,242,254,0.4)] active:scale-95 transition-all min-h-[48px] min-w-[48px] m3-touch-target focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:outline-none"
                 title="Create new habit"
               >
                 <IconPlus />
