@@ -52,6 +52,20 @@ export const getStreakStartDate = (habitId: string, completions: CompletionRecor
   };
 };
 
+export const calculateConsistencyScore = (habit: Habit, completions: CompletionRecord[]): number => {
+  const habitCompletions = completions.filter(c => c.habitId === habit.id);
+  const uniqueCompletionDays = new Set(habitCompletions.map(c => c.date)).size;
+
+  const today = new Date();
+  const createdDate = habit.createdAt ? new Date(habit.createdAt) : today;
+
+  const startMs = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate()).getTime();
+  const todayMs = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+
+  const totalDays = Math.max(1, Math.floor((todayMs - startMs) / (1000 * 60 * 60 * 24)) + 1);
+  return Math.min(100, Math.round((uniqueCompletionDays / totalDays) * 100));
+};
+
 export const getWeeklyHistory = (completions: CompletionRecord[], date: Date = new Date()) => {
   const start = startOfWeek(date, { weekStartsOn: 1 }); // Monday
   const end = endOfWeek(date, { weekStartsOn: 1 }); // Sunday

@@ -1,8 +1,8 @@
 import { Habit, CompletionRecord } from '../types';
-import { calculateStreak, isCompletedToday, getStreakStartDate } from '../utils/dates';
+import { calculateStreak, isCompletedToday, getStreakStartDate, calculateConsistencyScore } from '../utils/dates';
 import { CategoryManager } from '../utils/categories';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Flame, MoreVertical, Edit2, Trash2, Calendar, ChevronDown } from 'lucide-react';
+import { Check, Flame, MoreVertical, Edit2, Trash2, Calendar, ChevronDown, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface HabitCardProps {
@@ -19,6 +19,7 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
   const [isStreakExpanded, setIsStreakExpanded] = useState(false);
   const completed = isCompletedToday(habit.id, completions);
   const streakInfo = getStreakStartDate(habit.id, completions);
+  const consistencyScore = calculateConsistencyScore(habit, completions);
   const categoryDef = CategoryManager.getCategoryByName(habit.category);
 
   return (
@@ -104,11 +105,11 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
                         }}
                       />
                       <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 5 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 5 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute left-0 top-full mt-2 z-30 min-w-[190px] bg-[#1c1f26] border border-amber-500/30 rounded-2xl p-3 shadow-2xl text-xs text-gray-200 space-y-1.5"
+                        initial={{ opacity: 0, scaleY: 0.85, scaleX: 0.95, y: -8 }}
+                        animate={{ opacity: 1, scaleY: 1, scaleX: 1, y: 0 }}
+                        exit={{ opacity: 0, scaleY: 0.85, scaleX: 0.95, y: -8 }}
+                        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                        className="streak-detail-view origin-top-left absolute left-0 top-full mt-2 z-30 min-w-[190px] bg-[#1c1f26] border border-amber-500/30 rounded-2xl p-3 shadow-2xl text-xs text-gray-200 space-y-1.5 overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="flex items-center gap-1.5 font-bold text-amber-400 pb-1.5 border-b border-white/10">
@@ -125,6 +126,13 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
                             Started on:
                           </span>
                           <span className="font-semibold text-amber-300">{streakInfo.formattedStartDate || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-gray-300 pt-1 border-t border-white/10">
+                          <span className="text-gray-400 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3 text-emerald-400" />
+                            Consistency:
+                          </span>
+                          <span className="font-semibold text-emerald-400">{consistencyScore}%</span>
                         </div>
                       </motion.div>
                     </>

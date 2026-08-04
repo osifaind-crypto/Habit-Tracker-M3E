@@ -142,40 +142,6 @@ export default function App() {
               transition={{ duration: 0.2 }}
               className="space-y-8"
             >
-              {/* Daily Goal Card */}
-              <section className="bg-surface rounded-3xl p-6 border border-white/5 shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center gap-6">
-                <div className="absolute top-1/2 left-12 -translate-y-1/2 w-32 h-32 bg-primary/20 rounded-full blur-[50px] pointer-events-none" />
-                
-                <div className="flex-shrink-0">
-                  <ProgressRing progress={progress} size={130} strokeWidth={12} />
-                </div>
-
-                <div className="text-center sm:text-left flex-1 min-w-0">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-2">
-                    <Target className="w-3.5 h-3.5" /> Daily Focus
-                  </span>
-                  <h3 className="text-xl font-bold text-white tracking-tight mb-1">
-                    {progress === 1 ? '🎉 All Tasks Complete!' : `${todayCompletions} of ${data.habits.length} Tasks Done`}
-                  </h3>
-                  <p className="text-gray-400 text-sm leading-relaxed mb-3">
-                    {data.habits.length === 0
-                      ? 'No habits created yet. Add your first task to get started!'
-                      : progress === 1
-                      ? 'Fantastic job! You achieved 100% of your goals for today.'
-                      : `${data.habits.length - todayCompletions} remaining today. Keep building your daily momentum!`}
-                  </p>
-                  
-                  {data.habits.length > 0 && (
-                    <div className="w-full bg-[#1c1f26] h-2.5 rounded-full overflow-hidden p-0.5 border border-white/5">
-                      <div
-                        className="h-full bg-gradient-to-r from-secondary to-primary rounded-full transition-all duration-500"
-                        style={{ width: `${Math.round(progress * 100)}%` }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </section>
-
               {/* Tasks List Header & Filter */}
               <section>
                 <div className="flex items-center justify-between mb-6">
@@ -232,6 +198,40 @@ export default function App() {
                       ))
                     )}
                   </AnimatePresence>
+                </div>
+              </section>
+
+              {/* Daily Goal Card */}
+              <section className="bg-surface rounded-3xl p-6 border border-white/5 shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center gap-6">
+                <div className="absolute top-1/2 left-12 -translate-y-1/2 w-32 h-32 bg-primary/20 rounded-full blur-[50px] pointer-events-none" />
+                
+                <div className="flex-shrink-0">
+                  <ProgressRing progress={progress} size={130} strokeWidth={12} />
+                </div>
+
+                <div className="text-center sm:text-left flex-1 min-w-0">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-2">
+                    <Target className="w-3.5 h-3.5" /> Daily Focus
+                  </span>
+                  <h3 className="text-xl font-bold text-white tracking-tight mb-1">
+                    {progress === 1 ? '🎉 All Tasks Complete!' : `${todayCompletions} of ${data.habits.length} Tasks Done`}
+                  </h3>
+                  <p className="text-gray-400 text-sm leading-relaxed mb-3">
+                    {data.habits.length === 0
+                      ? 'No habits created yet. Add your first task to get started!'
+                      : progress === 1
+                      ? 'Fantastic job! You achieved 100% of your goals for today.'
+                      : `${data.habits.length - todayCompletions} remaining today. Keep building your daily momentum!`}
+                  </p>
+                  
+                  {data.habits.length > 0 && (
+                    <div className="w-full bg-[#1c1f26] h-2.5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                      <div
+                        className="h-full bg-gradient-to-r from-secondary to-primary rounded-full transition-all duration-500"
+                        style={{ width: `${Math.round(progress * 100)}%` }}
+                      />
+                    </div>
+                  )}
                 </div>
               </section>
             </motion.div>

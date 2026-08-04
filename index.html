@@ -52,6 +52,21 @@
     .animate-fade-in {
       animation: fadeIn 0.25s ease-out forwards;
     }
+    @keyframes streakExpand {
+      from {
+        opacity: 0;
+        transform: scaleY(0.8) scaleX(0.95) translateY(-8px);
+        transform-origin: top left;
+      }
+      to {
+        opacity: 1;
+        transform: scaleY(1) scaleX(1) translateY(0);
+        transform-origin: top left;
+      }
+    }
+    .animate-streak-expand {
+      animation: streakExpand 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
   </style>
 </head>
 <body class="bg-background text-gray-100 min-h-screen">
@@ -121,6 +136,20 @@
       }
 
       return { streak, startDate, formattedStartDate };
+    }
+
+    function calculateConsistencyScore(habit, completions) {
+      const habitCompletions = completions.filter(c => c.habitId === habit.id);
+      const uniqueCompletionDays = new Set(habitCompletions.map(c => c.date)).size;
+
+      const today = new Date();
+      const createdDate = habit.createdAt ? new Date(habit.createdAt) : today;
+
+      const startMs = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate()).getTime();
+      const todayMs = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+
+      const totalDays = Math.max(1, Math.floor((todayMs - startMs) / (1000 * 60 * 60 * 24)) + 1);
+      return Math.min(100, Math.round((uniqueCompletionDays / totalDays) * 100));
     }
 
     function getWeeklyHistory(completions) {
@@ -455,6 +484,7 @@
       const [isStreakExpanded, setIsStreakExpanded] = useState(false);
       const completed = isCompletedToday(habit.id, completions);
       const streakInfo = getStreakStartDate(habit.id, completions);
+      const consistencyScore = calculateConsistencyScore(habit, completions);
       const categoryDef = CategoryManager.getCategoryByName(habit.category);
 
       return (
@@ -515,7 +545,7 @@
                             }}
                           />
                           <div
-                            className="absolute left-0 top-full mt-2 z-30 min-w-[190px] bg-[#1c1f26] border border-amber-500/30 rounded-2xl p-3 shadow-2xl text-xs text-gray-200 space-y-1.5 animate-fade-in"
+                            className="streak-detail-view origin-top-left overflow-hidden absolute left-0 top-full mt-2 z-30 min-w-[190px] bg-[#1c1f26] border border-amber-500/30 rounded-2xl p-3 shadow-2xl text-xs text-gray-200 space-y-1.5 animate-streak-expand"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <div className="flex items-center gap-1.5 font-bold text-amber-400 pb-1.5 border-b border-white/10">
@@ -529,6 +559,10 @@
                             <div className="flex justify-between items-center text-gray-300">
                               <span className="text-gray-400">Started on:</span>
                               <span className="font-semibold text-amber-300">{streakInfo.formattedStartDate || 'N/A'}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-gray-300 pt-1 border-t border-white/10">
+                              <span className="text-gray-400">Consistency:</span>
+                              <span className="font-semibold text-emerald-400">{consistencyScore}%</span>
                             </div>
                           </div>
                         </>
@@ -891,32 +925,6 @@
           <main className="max-w-2xl mx-auto px-6">
             {activeTab === 'tasks' ? (
               <div className="space-y-8 animate-fade-in">
-                <section className="bg-surface rounded-3xl p-6 border border-white/5 shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center gap-6">
-                  <div className="flex-shrink-0">
-                    <ProgressRing progress={progress} size={130} strokeWidth={12} />
-                  </div>
-                  <div className="text-center sm:text-left flex-1 min-w-0">
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-primary px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-2">
-                      🎯 Daily Focus
-                    </span>
-                    <h3 className="text-xl font-bold text-white tracking-tight mb-1">
-                      {progress === 1 ? '🎉 All Tasks Complete!' : `${todayCompletions} of ${data.habits.length} Tasks Done`}
-                    </h3>
-                    <p className="text-gray-400 text-sm leading-relaxed mb-3">
-                      {data.habits.length === 0
-                        ? 'No habits created yet. Add your first task to get started!'
-                        : progress === 1
-                        ? 'Fantastic job! You achieved 100% of your goals for today.'
-                        : `${data.habits.length - todayCompletions} remaining today. Keep building your daily momentum!`}
-                    </p>
-                    {data.habits.length > 0 && (
-                      <div className="w-full bg-[#1c1f26] h-2.5 rounded-full overflow-hidden p-0.5 border border-white/5">
-                        <div className="h-full bg-gradient-to-r from-secondary to-primary rounded-full transition-all duration-500" style={{ width: `${Math.round(progress * 100)}%` }} />
-                      </div>
-                    )}
-                  </div>
-                </section>
-
                 <section>
                   <div className="flex items-center justify-between mb-6">
                     <div>
@@ -954,6 +962,32 @@
                           onDelete={() => deleteHabit(habit.id)}
                         />
                       ))
+                    )}
+                  </div>
+                </section>
+
+                <section className="bg-surface rounded-3xl p-6 border border-white/5 shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center gap-6">
+                  <div className="flex-shrink-0">
+                    <ProgressRing progress={progress} size={130} strokeWidth={12} />
+                  </div>
+                  <div className="text-center sm:text-left flex-1 min-w-0">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-primary px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-2">
+                      🎯 Daily Focus
+                    </span>
+                    <h3 className="text-xl font-bold text-white tracking-tight mb-1">
+                      {progress === 1 ? '🎉 All Tasks Complete!' : `${todayCompletions} of ${data.habits.length} Tasks Done`}
+                    </h3>
+                    <p className="text-gray-400 text-sm leading-relaxed mb-3">
+                      {data.habits.length === 0
+                        ? 'No habits created yet. Add your first task to get started!'
+                        : progress === 1
+                        ? 'Fantastic job! You achieved 100% of your goals for today.'
+                        : `${data.habits.length - todayCompletions} remaining today. Keep building your daily momentum!`}
+                    </p>
+                    {data.habits.length > 0 && (
+                      <div className="w-full bg-[#1c1f26] h-2.5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                        <div className="h-full bg-gradient-to-r from-secondary to-primary rounded-full transition-all duration-500" style={{ width: `${Math.round(progress * 100)}%` }} />
+                      </div>
                     )}
                   </div>
                 </section>
