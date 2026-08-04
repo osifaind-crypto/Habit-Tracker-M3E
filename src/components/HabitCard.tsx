@@ -1,5 +1,6 @@
 import { Habit, CompletionRecord } from '../types';
 import { calculateStreak, isCompletedToday } from '../utils/dates';
+import { CategoryManager } from '../utils/categories';
 import { motion } from 'motion/react';
 import { Check, Flame, MoreVertical, Edit2, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
@@ -17,6 +18,7 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
   const [showMenu, setShowMenu] = useState(false);
   const completed = isCompletedToday(habit.id, completions);
   const streak = calculateStreak(habit.id, completions);
+  const categoryDef = CategoryManager.getCategoryByName(habit.category);
 
   return (
     <motion.div
@@ -60,7 +62,10 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
           {habit.title}
         </h3>
         <div className="flex items-center gap-2 mt-1 text-sm text-gray-400">
-          <span className="truncate">{habit.category}</span>
+          <span className="flex items-center gap-1 font-medium text-gray-300 truncate">
+            <span>{categoryDef.icon}</span>
+            <span>{habit.category}</span>
+          </span>
           <span>•</span>
           <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${
             habit.priority === 'high' ? 'bg-red-500/20 text-red-400' :
