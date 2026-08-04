@@ -95,13 +95,13 @@ export function MilestoneBadges({ habits, completions }: MilestoneBadgesProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedMilestone(null)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 m3-scrim"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 10 }}
-              className="relative w-full max-w-xs bg-white dark:bg-[#1a1c23] rounded-2xl p-5 shadow-2xl border border-slate-200 dark:border-white/10 text-center"
+              className="relative w-full max-w-xs m3-elevation-5 rounded-2xl p-5 text-center"
             >
               <div
                 className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-3 border shadow-lg"

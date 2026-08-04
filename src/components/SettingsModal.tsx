@@ -63,13 +63,13 @@ export function SettingsModal({ isOpen, onClose, data, onImport, onClear }: Sett
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 m3-scrim"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-md bg-white dark:bg-[#121824] rounded-3xl p-6 shadow-2xl border border-slate-200/80 dark:border-white/10"
+            className="relative w-full max-w-md m3-elevation-5 rounded-3xl p-6"
           >
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">Settings</h2>

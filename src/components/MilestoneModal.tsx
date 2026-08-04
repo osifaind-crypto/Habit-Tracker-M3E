@@ -91,14 +91,14 @@ export function MilestoneModal({ isOpen, onClose, milestone, habitTitle }: Miles
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/70 backdrop-blur-md"
+            className="absolute inset-0 m3-scrim"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 30 }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-            className="relative w-full max-w-sm bg-surface rounded-3xl p-6 shadow-2xl border border-white/10 text-center overflow-hidden"
+            className="relative w-full max-w-sm m3-elevation-5 rounded-3xl p-6 text-center overflow-hidden"
           >
             {/* Background glow behind badge */}
             <div

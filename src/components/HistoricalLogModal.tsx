@@ -59,7 +59,7 @@ export const HistoricalLogModal: React.FC<HistoricalLogModalProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          className="absolute inset-0 m3-scrim"
           onClick={onClose}
         />
 
@@ -68,7 +68,7 @@ export const HistoricalLogModal: React.FC<HistoricalLogModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-lg bg-white dark:bg-[#121824] rounded-3xl p-6 shadow-2xl border border-slate-200/80 dark:border-white/10 z-10 max-h-[90vh] flex flex-col transition-colors"
+          className="relative w-full max-w-lg m3-elevation-5 rounded-3xl p-6 z-10 max-h-[90vh] flex flex-col transition-colors"
         >
           {/* Top Bar Navigation */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-200/80 dark:border-white/10 mb-4">
