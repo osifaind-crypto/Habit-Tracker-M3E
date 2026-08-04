@@ -69,6 +69,13 @@ export const useAppState = () => {
     }));
   };
 
+  const reorderHabits = (newHabits: Habit[]) => {
+    setData(prev => ({
+      ...prev,
+      habits: newHabits,
+    }));
+  };
+
   const toggleCompletion = (habitId: string, date: string) => {
     setData(prev => {
       const exists = prev.completions.some(c => c.habitId === habitId && c.date === date);
@@ -99,6 +106,7 @@ export const useAppState = () => {
     addHabit,
     updateHabit,
     deleteHabit,
+    reorderHabits,
     toggleCompletion,
     importData,
     clearData,

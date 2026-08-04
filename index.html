@@ -105,6 +105,7 @@
     const IconX = () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>);
     const IconAward = () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-6.75c-.621 0-1.125.504-1.125 1.125v3.375m9 0h3a2.25 2.25 0 0 0 2.25-2.25V6a2.25 2.25 0 0 0-2.25-2.25H3.75A2.25 2.25 0 0 0 1.5 6v10.5A2.25 2.25 0 0 0 3.75 18.75h3"/></svg>);
     const IconLock = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>);
+    const IconGrip = () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6h16.5"/></svg>);
 
     // --- Date Utilities ---
     function getTodayStr() {
@@ -803,7 +804,7 @@
     }
 
     // Habit Card Component
-    function HabitCard({ habit, completions, onToggle, onEdit, onDelete }) {
+    function HabitCard({ habit, completions, onToggle, onEdit, onDelete, index, onDragStart, onDragOver, onDrop, isDragging }) {
       const [showMenu, setShowMenu] = useState(false);
       const [isStreakExpanded, setIsStreakExpanded] = useState(false);
       const completed = isCompletedToday(habit.id, completions);
@@ -812,11 +813,26 @@
       const categoryDef = CategoryManager.getCategoryByName(habit.category);
 
       return (
-        <div className="relative bg-surface rounded-2xl p-4 flex items-center justify-between border border-white/5 hover:border-white/10 transition-all shadow-md group animate-fade-in">
-          <div className="flex items-center gap-4 flex-1 min-w-0 pr-2">
+        <div
+          draggable={true}
+          onDragStart={(e) => onDragStart && onDragStart(e, index)}
+          onDragOver={(e) => onDragOver && onDragOver(e, index)}
+          onDrop={(e) => onDrop && onDrop(e, index)}
+          className={`relative bg-surface rounded-2xl p-4 flex items-center justify-between border border-white/5 hover:border-white/10 transition-all shadow-md group animate-fade-in ${
+            isDragging ? 'opacity-40 border-primary scale-[0.98]' : ''
+          }`}
+        >
+          <div className="flex items-center gap-3 flex-1 min-w-0 pr-2">
+            <div
+              className="p-1 cursor-grab active:cursor-grabbing text-gray-500 hover:text-gray-300 transition-colors shrink-0 -ml-1"
+              title="Drag handle to reorder priority"
+            >
+              <IconGrip />
+            </div>
+
             <button
               onClick={onToggle}
-              className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all focus:outline-none ${
+              className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all focus:outline-none shrink-0 ${
                 completed ? 'bg-primary text-white shadow-[0_0_15px_rgba(139,92,246,0.5)]' : 'bg-[#1c1f26] border border-white/10 text-transparent hover:border-primary/50'
               }`}
               style={completed ? { backgroundColor: habit.color } : {}}
@@ -1215,6 +1231,33 @@
         handleToggleCompletionForDate(habitId, todayStr);
       };
 
+      const reorderHabits = (newHabits) => {
+        setData(prev => ({ ...prev, habits: newHabits }));
+      };
+
+      const [draggedIdx, setDraggedIdx] = useState(null);
+
+      const handleDragStart = (e, index) => {
+        setDraggedIdx(index);
+        e.dataTransfer.effectAllowed = 'move';
+      };
+
+      const handleDragOver = (e, index) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      };
+
+      const handleDrop = (e, targetIdx) => {
+        e.preventDefault();
+        if (draggedIdx === null || draggedIdx === targetIdx) return;
+        const updated = [...sortedHabits];
+        const [moved] = updated.splice(draggedIdx, 1);
+        updated.splice(targetIdx, 0, moved);
+        reorderHabits(updated);
+        if (sortBy !== 'manual') setSortBy('manual');
+        setDraggedIdx(null);
+      };
+
       const todayCompletions = data.habits.filter(h => data.completions.some(c => c.habitId === h.id && c.date === todayStr)).length;
       const progress = data.habits.length === 0 ? 0 : todayCompletions / data.habits.length;
 
@@ -1225,6 +1268,7 @@
       }, [data.habits, data.completions]);
 
       const sortedHabits = useMemo(() => {
+        if (sortBy === 'manual') return data.habits;
         return [...data.habits].sort((a, b) => {
           if (sortBy === 'name') return a.title.localeCompare(b.title);
           if (sortBy === 'priority') {
@@ -1238,16 +1282,20 @@
       const formattedToday = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
       return (
-        <div className="min-h-screen bg-background pb-32">
-          <header className="px-6 pt-10 pb-6">
+        <div className="min-h-screen bg-[#0b0f17] text-slate-100 pb-32 relative overflow-hidden">
+          {/* Subtle Ambient Wash */}
+          <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-80 bg-gradient-to-b from-teal-500/10 via-cyan-500/5 to-transparent blur-3xl pointer-events-none -z-10 animate-gemini-glow" />
+
+          <header className="px-6 pt-8 pb-4">
             <div className="max-w-2xl mx-auto flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm font-medium mb-1">{formattedToday}</p>
-                <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
-                  Habits <IconSparkles />
+                <p className="text-gray-400 text-xs font-semibold tracking-wide uppercase">{formattedToday}</p>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-0.5 flex items-center gap-2">
+                  <span>Habit Tracker</span>
+                  <IconSparkles />
                 </h1>
               </div>
-              <button onClick={() => setIsSettingsOpen(true)} className="w-11 h-11 rounded-2xl bg-surface hover:bg-surface-hover flex items-center justify-center text-gray-400 hover:text-white transition-colors border border-white/5 shadow-lg">
+              <button onClick={() => setIsSettingsOpen(true)} className="w-10 h-10 rounded-xl bg-[#121824] hover:bg-[#1a2333] flex items-center justify-center text-gray-300 hover:text-white transition-all border border-white/10 active:scale-95">
                 <IconSettings />
               </button>
             </div>
@@ -1269,6 +1317,7 @@
                     </div>
                     <div className="relative">
                       <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="appearance-none bg-surface border border-white/10 text-gray-300 text-xs font-medium rounded-xl pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer hover:bg-surface-hover transition-colors">
+                        <option value="manual">Custom (Drag to reorder)</option>
                         <option value="date">Latest</option>
                         <option value="name">Name</option>
                         <option value="priority">Priority</option>
@@ -1288,14 +1337,19 @@
                         </button>
                       </div>
                     ) : (
-                      sortedHabits.map(habit => (
+                      sortedHabits.map((habit, idx) => (
                         <HabitCard
                           key={habit.id}
                           habit={habit}
+                          index={idx}
                           completions={data.completions}
                           onToggle={() => handleToggleCompletion(habit.id)}
                           onEdit={() => { setEditingHabit(habit); setIsFormOpen(true); }}
                           onDelete={() => deleteHabit(habit.id)}
+                          onDragStart={handleDragStart}
+                          onDragOver={handleDragOver}
+                          onDrop={handleDrop}
+                          isDragging={draggedIdx === idx}
                         />
                       ))
                     )}
@@ -1359,16 +1413,16 @@
 
           {/* Floating Pill Bottom Navigation Bar */}
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[92vw]">
-            <nav className="bg-[#16181d]/95 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.6)] flex items-center gap-1">
+            <nav className="bg-[#121824]/95 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-lg flex items-center gap-1">
               <button
                 onClick={() => setActiveTab('tasks')}
-                className={`flex items-center gap-2 py-2.5 px-4 rounded-full text-xs font-semibold transition-all ${
-                  activeTab === 'tasks' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                className={`flex items-center gap-2 py-2 px-3.5 rounded-full text-xs font-medium transition-all ${
+                  activeTab === 'tasks' ? 'bg-teal-500/15 text-cyan-300 font-semibold' : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <span>Today's Tasks</span>
+                <span>Tasks</span>
                 {data.habits.length > 0 && (
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === 'tasks' ? 'bg-white/20 text-white' : 'bg-[#1c1f26] text-gray-400'}`}>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${activeTab === 'tasks' ? 'bg-teal-500/20 text-cyan-300' : 'bg-[#1c1f26] text-gray-400'}`}>
                     {todayCompletions}/{data.habits.length}
                   </span>
                 )}
@@ -1376,18 +1430,18 @@
 
               <button
                 onClick={() => setActiveTab('summaries')}
-                className={`flex items-center gap-2 py-2.5 px-4 rounded-full text-xs font-semibold transition-all ${
-                  activeTab === 'summaries' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                className={`flex items-center gap-2 py-2 px-3.5 rounded-full text-xs font-medium transition-all ${
+                  activeTab === 'summaries' ? 'bg-teal-500/15 text-cyan-300 font-semibold' : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <span>Summaries</span>
               </button>
 
-              <div className="h-5 w-px bg-white/10 mx-0.5" />
+              <div className="h-4 w-px bg-white/10 mx-0.5" />
 
               <button
                 onClick={() => { setEditingHabit(null); setIsFormOpen(true); }}
-                className="flex items-center gap-1.5 bg-gradient-to-r from-primary to-secondary text-white font-semibold text-xs px-3.5 py-2.5 rounded-full shadow-md hover:brightness-110 active:scale-95 transition-all"
+                className="flex items-center gap-1 bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs px-3.5 py-2 rounded-full shadow-sm active:scale-95 transition-all"
                 title="Create new habit"
               >
                 <IconPlus />

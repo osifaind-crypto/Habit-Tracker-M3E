@@ -1,5 +1,6 @@
 export type Frequency = 'daily' | 'weekly';
 export type Priority = 'low' | 'medium' | 'high';
+export type SortOption = 'manual' | 'date' | 'name' | 'priority';
 
 export interface Habit {
   id: string;

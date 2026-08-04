@@ -1,8 +1,8 @@
 import { Habit, CompletionRecord } from '../types';
 import { calculateStreak, isCompletedToday, getStreakStartDate, calculateConsistencyScore } from '../utils/dates';
 import { CategoryManager } from '../utils/categories';
-import { motion, AnimatePresence } from 'motion/react';
-import { Check, Flame, MoreVertical, Edit2, Trash2, Calendar, ChevronDown, TrendingUp } from 'lucide-react';
+import { motion, AnimatePresence, DragControls } from 'motion/react';
+import { Check, Flame, MoreVertical, Edit2, Trash2, Calendar, ChevronDown, TrendingUp, GripVertical } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface HabitCardProps {
@@ -12,9 +12,10 @@ interface HabitCardProps {
   onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  dragControls?: DragControls;
 }
 
-export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: HabitCardProps) {
+export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, dragControls }: HabitCardProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [isStreakExpanded, setIsStreakExpanded] = useState(false);
   const completed = isCompletedToday(habit.id, completions);
@@ -33,7 +34,7 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ scale: 1.01 }}
-      className={`relative rounded-3xl p-4 sm:p-5 flex items-center gap-4 transition-all duration-300 shadow-sm dark:shadow-xl ${
+      className={`relative rounded-3xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 transition-all duration-300 shadow-sm dark:shadow-xl ${
         completed
           ? 'bg-slate-100/80 dark:bg-[#182030]'
           : 'bg-white dark:bg-[#121824]'
@@ -43,6 +44,16 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete }: Ha
         border: `1px solid ${completed ? `${habit.color}60` : 'rgba(148, 163, 184, 0.15)'}`,
       }}
     >
+      {dragControls && (
+        <div
+          onPointerDown={(e) => dragControls.start(e)}
+          className="shrink-0 p-1 cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 dark:text-gray-600 dark:hover:text-gray-300 transition-colors touch-none -ml-1"
+          title="Drag handle to reorder priority"
+        >
+          <GripVertical className="w-5 h-5" />
+        </div>
+      )}
+
       <button
         onClick={onToggle}
         className="shrink-0 flex items-center justify-center rounded-full transition-all duration-300 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
