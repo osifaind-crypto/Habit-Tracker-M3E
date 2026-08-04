@@ -19,14 +19,18 @@
             sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
           },
           colors: {
-            background: '#000c14',
-            surface: '#001a2e',
-            'surface-hover': '#00243f',
-            primary: '#00f2fe',
-            secondary: '#00d8ff',
-            teal: '#0d9488',
-            violet: '#8b5cf6',
-            indigo: '#6366f1',
+            background: '#0b0e14',
+            surface: '#1a1f2c',
+            'surface-low': '#121620',
+            'surface-high': '#222838',
+            'surface-highest': '#2c3346',
+            'surface-hover': '#222838',
+            primary: '#80d4ff',
+            secondary: '#a7c7e7',
+            tertiary: '#c084fc',
+            teal: '#80d4ff',
+            violet: '#c084fc',
+            indigo: '#a7c7e7',
           }
         }
       }
@@ -40,17 +44,107 @@
   <!-- Canvas Confetti CDN -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
   <style>
-    /* 1. Deep Space & Ambient Organic Background */
+    /* Material 3 Surface & Color System Variables */
+    :root {
+      --m3-surface-dim: #0b0e14;
+      --m3-surface-container-low: #121620;
+      --m3-surface-container: #1a1f2c;
+      --m3-surface-container-high: #222838;
+      --m3-surface-container-highest: #2c3346;
+      --m3-primary: #80d4ff;
+      --m3-secondary: #a7c7e7;
+      --m3-tertiary: #c084fc;
+      --m3-border: rgba(255, 255, 255, 0.08);
+      --m3-primary-overlay: rgba(128, 212, 255, 0.12);
+    }
+
+    /* 1. Base Surface (Canvas: #0b0e14) & Ambient Glows */
     body {
-      background-color: #03070b;
+      background-color: #0b0e14;
       background-image: 
-        radial-gradient(circle at 50% -10%, rgba(0, 180, 216, 0.25) 0%, transparent 50%),
-        radial-gradient(circle at 100% 60%, rgba(10, 80, 100, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 0% 90%, rgba(5, 45, 65, 0.2) 0%, transparent 45%);
+        radial-gradient(circle at 50% -10%, rgba(128, 212, 255, 0.22) 0%, transparent 50%),
+        radial-gradient(circle at 100% 60%, rgba(192, 132, 252, 0.14) 0%, transparent 40%),
+        radial-gradient(circle at 0% 90%, rgba(167, 199, 231, 0.16) 0%, transparent 45%);
       background-attachment: fixed;
       color: #e2e8f0;
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       overflow-x: hidden;
+    }
+
+    /* 2. Tonal Elevation Hierarchy & Rim Lighting */
+    .m3-surface-low {
+      background-color: var(--m3-surface-container-low);
+      border: 1px solid var(--m3-border);
+    }
+
+    .m3-surface-container, .gemini-card {
+      background-color: var(--m3-surface-container);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid var(--m3-border);
+      box-shadow: 
+        0 20px 40px -15px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+      border-radius: 32px;
+      transition: all 0.3s cubic-bezier(0.2, 0.0, 0.0, 1.0);
+    }
+
+    .m3-surface-container:hover, .gemini-card:hover {
+      background-color: var(--m3-surface-container-high);
+      border-color: rgba(128, 212, 255, 0.35);
+      box-shadow: 
+        0 24px 48px -12px rgba(0, 0, 0, 0.8),
+        0 0 24px rgba(128, 212, 255, 0.15),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    }
+
+    /* Material 3 Card Press Spring Effect */
+    .m3-surface-container:active, .gemini-card:active, .m3-card-press:active {
+      transform: scale(0.98);
+      transition: transform 0.3s cubic-bezier(0.2, 0.0, 0.0, 1.0);
+    }
+
+    /* Habit Completion Toggle Morphing Button (rounded-2xl -> rounded-full) */
+    .m3-completion-toggle {
+      border-radius: 16px;
+      transition: all 0.3s cubic-bezier(0.2, 0.0, 0.0, 1.0);
+    }
+    .m3-completion-toggle.is-checked {
+      border-radius: 9999px;
+      background: linear-gradient(135deg, #80d4ff 0%, #00b4d8 100%);
+      box-shadow: 0 0 16px rgba(128, 212, 255, 0.4);
+    }
+
+    /* FAB Primary Action Expand Micro-interaction */
+    .m3-fab-expand {
+      border-radius: 9999px;
+      transition: all 0.3s cubic-bezier(0.2, 0.0, 0.0, 1.0);
+    }
+
+    .m3-surface-highest {
+      background-color: var(--m3-surface-container-highest);
+      border: 1px solid var(--m3-border);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Active Cards with Subtle Primary Tint Overlay */
+    .m3-active-card, .gemini-glow-active {
+      background: linear-gradient(135deg, rgba(128, 212, 255, 0.12) 0%, rgba(26, 31, 44, 0.95) 100%);
+      border: 1px solid rgba(128, 212, 255, 0.45);
+      box-shadow: 0 0 20px rgba(128, 212, 255, 0.25);
+    }
+
+    /* Floating Pill Containers */
+    .gemini-pill, .gemini-pill-nav {
+      background: rgba(26, 31, 44, 0.9);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(128, 212, 255, 0.2);
+      box-shadow: 
+        0 12px 32px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(128, 212, 255, 0.15),
+        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      border-radius: 9999px;
     }
 
     ::-webkit-scrollbar {
@@ -61,11 +155,11 @@
       background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(0, 242, 254, 0.2);
+      background: rgba(128, 212, 255, 0.2);
       border-radius: 9999px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 242, 254, 0.4);
+      background: rgba(128, 212, 255, 0.4);
     }
 
     @keyframes fadeIn {
@@ -1023,13 +1117,13 @@
           onDragStart={(e) => onDragStart && onDragStart(e, index)}
           onDragOver={(e) => onDragOver && onDragOver(e, index)}
           onDrop={(e) => onDrop && onDrop(e, index)}
-          className={`relative gemini-card rounded-2xl p-4 flex items-center justify-between border transition-all shadow-lg group animate-fade-in ${
-            completed ? 'border-[#00f2fe]/30 bg-gradient-to-r from-[#001e36]/80 to-[#001222]/90' : 'border-[#00f2fe]/10'
-          } ${isDragging ? 'opacity-40 border-[#00f2fe] scale-[0.98]' : ''}`}
+          className={`relative gemini-card rounded-[32px] p-4 flex items-center justify-between border transition-all shadow-lg group animate-fade-in m3-card-press ${
+            completed ? 'm3-active-card border-[#80d4ff]/40' : 'border-[#253045]'
+          } ${isDragging ? 'opacity-40 border-[#80d4ff] scale-[0.98]' : ''}`}
         >
           <div className="flex items-center gap-3.5 flex-1 min-w-0 pr-2">
             <div
-              className="p-1 cursor-grab active:cursor-grabbing text-teal-200/40 hover:text-[#00f2fe] transition-colors shrink-0 -ml-1"
+              className="p-1 cursor-grab active:cursor-grabbing text-teal-200/40 hover:text-[#80d4ff] transition-colors shrink-0 -ml-1"
               title="Drag handle to reorder priority"
             >
               <IconGrip />
@@ -1037,10 +1131,10 @@
 
             <button
               onClick={onToggle}
-              className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 focus:outline-none shrink-0 active:scale-90 hover:scale-105 ${
+              className={`w-11 h-11 m3-completion-toggle flex items-center justify-center transition-all duration-300 focus:outline-none shrink-0 active:scale-90 hover:scale-105 ${
                 completed
-                  ? 'bg-gradient-to-tr from-[#00f2fe] to-[#00a8ff] text-slate-950 shadow-[0_0_20px_rgba(0,242,254,0.5)]'
-                  : 'bg-[#001729] border border-[#00f2fe]/20 text-transparent hover:border-[#00f2fe]/60'
+                  ? 'is-checked rounded-full bg-gradient-to-tr from-[#80d4ff] to-[#00b4d8] text-slate-950 shadow-[0_0_20px_rgba(128,212,255,0.5)]'
+                  : 'rounded-2xl bg-[#121620] border border-white/10 text-transparent hover:border-[#80d4ff]/60'
               }`}
               style={completed && habit.color ? { backgroundColor: habit.color } : {}}
             >

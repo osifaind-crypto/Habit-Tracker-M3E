@@ -35,14 +35,14 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ scale: 1.01 }}
-      className={`relative rounded-3xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 transition-all duration-300 shadow-sm dark:shadow-xl ${
+      className={`relative rounded-[32px] p-4 sm:p-5 flex items-center gap-3 sm:gap-4 transition-all duration-300 m3-card-press ${
         completed
-          ? 'bg-slate-100/80 dark:bg-[#182030]'
-          : 'bg-white dark:bg-[#121824]'
+          ? 'm3-active-card bg-slate-100/80 dark:bg-[#1a1f2c]'
+          : 'gemini-card bg-white dark:bg-[#1a1f2c]'
       }`}
       style={{
         boxShadow: completed ? `0 0 18px -4px ${habit.color}35` : undefined,
-        border: `1px solid ${completed ? `${habit.color}60` : 'rgba(148, 163, 184, 0.15)'}`,
+        border: `1px solid ${completed ? `${habit.color}60` : 'rgba(255, 255, 255, 0.08)'}`,
       }}
     >
       {dragControls && (
@@ -57,7 +57,9 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
 
       <button
         onClick={onToggle}
-        className="shrink-0 flex items-center justify-center rounded-full transition-all duration-300 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className={`shrink-0 flex items-center justify-center m3-completion-toggle transition-all duration-300 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+          completed ? 'is-checked rounded-full' : 'rounded-2xl'
+        }`}
         style={{
           width: '48px',
           height: '48px',
