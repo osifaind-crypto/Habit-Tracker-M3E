@@ -1,0 +1,6 @@
+{
+  "name": "Habit Tracker",
+  "description": "A beautiful, Material 3 Expressive habit tracker with streaks and analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
