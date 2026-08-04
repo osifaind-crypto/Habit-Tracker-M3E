@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Award, Sparkles, X, CheckCircle2 } from 'lucide-react';
+import { Award, Sparkles, X, Flame, Zap, Trophy, Rocket, Crown, CheckCircle2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export interface Milestone {
@@ -12,13 +12,32 @@ export interface Milestone {
   badgeBg: string;
 }
 
+export function renderMilestoneIcon(days: number, className: string = 'w-6 h-6') {
+  switch (days) {
+    case 3:
+      return <Flame className={className} />;
+    case 7:
+      return <Zap className={className} />;
+    case 14:
+      return <Sparkles className={className} />;
+    case 30:
+      return <Trophy className={className} />;
+    case 50:
+      return <Rocket className={className} />;
+    case 100:
+      return <Crown className={className} />;
+    default:
+      return <Award className={className} />;
+  }
+}
+
 export const MILESTONES: Milestone[] = [
-  { days: 3, title: 'Spark Starter', description: '3 Day Streak Achieved', icon: '🔥', color: '#f59e0b', badgeBg: 'bg-amber-500/10 border-amber-500/30' },
-  { days: 7, title: 'Week Warrior', description: '7 Day Streak Achieved', icon: '⚡', color: '#3b82f6', badgeBg: 'bg-blue-500/10 border-blue-500/30' },
-  { days: 14, title: 'Fortnight Focus', description: '14 Day Streak Achieved', icon: '🌟', color: '#8b5cf6', badgeBg: 'bg-violet-500/10 border-violet-500/30' },
-  { days: 30, title: 'Monthly Master', description: '30 Day Streak Achieved', icon: '🏆', color: '#10b981', badgeBg: 'bg-emerald-500/10 border-emerald-500/30' },
-  { days: 50, title: 'Unstoppable Force', description: '50 Day Streak Achieved', icon: '🚀', color: '#ec4899', badgeBg: 'bg-pink-500/10 border-pink-500/30' },
-  { days: 100, title: 'Centurion Legend', description: '100 Day Streak Achieved', icon: '👑', color: '#eab308', badgeBg: 'bg-yellow-500/10 border-yellow-500/30' },
+  { days: 3, title: 'Spark Starter', description: '3 Day Streak Achieved', icon: 'Flame', color: '#f59e0b', badgeBg: 'bg-amber-500/10 border-amber-500/30' },
+  { days: 7, title: 'Week Warrior', description: '7 Day Streak Achieved', icon: 'Zap', color: '#3b82f6', badgeBg: 'bg-blue-500/10 border-blue-500/30' },
+  { days: 14, title: 'Fortnight Focus', description: '14 Day Streak Achieved', icon: 'Sparkles', color: '#8b5cf6', badgeBg: 'bg-violet-500/10 border-violet-500/30' },
+  { days: 30, title: 'Monthly Master', description: '30 Day Streak Achieved', icon: 'Trophy', color: '#10b981', badgeBg: 'bg-emerald-500/10 border-emerald-500/30' },
+  { days: 50, title: 'Unstoppable Force', description: '50 Day Streak Achieved', icon: 'Rocket', color: '#ec4899', badgeBg: 'bg-pink-500/10 border-pink-500/30' },
+  { days: 100, title: 'Centurion Legend', description: '100 Day Streak Achieved', icon: 'Crown', color: '#eab308', badgeBg: 'bg-yellow-500/10 border-yellow-500/30' },
 ];
 
 interface MilestoneModalProps {
@@ -106,7 +125,7 @@ export function MilestoneModal({ isOpen, onClose, milestone, habitTitle }: Miles
                   boxShadow: `0 0 30px ${milestone.color}40`,
                 }}
               >
-                <span>{milestone.icon}</span>
+                {renderMilestoneIcon(milestone.days, "w-10 h-10")}
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}

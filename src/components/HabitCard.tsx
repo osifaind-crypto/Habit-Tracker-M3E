@@ -20,6 +20,7 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
   const [isStreakExpanded, setIsStreakExpanded] = useState(false);
   const completed = isCompletedToday(habit.id, completions);
   const streakInfo = getStreakStartDate(habit.id, completions);
+  const isHotStreak = streakInfo.streak > 3;
   const consistencyScore = calculateConsistencyScore(habit, completions);
   const categoryDef = CategoryManager.getCategoryByName(habit.category);
 
@@ -99,10 +100,29 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
                     e.stopPropagation();
                     setIsStreakExpanded(!isStreakExpanded);
                   }}
-                  className="streak-badge flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold bg-amber-500/10 hover:bg-amber-500/20 px-2 py-0.5 rounded-full text-xs transition-all cursor-pointer border border-amber-500/20 active:scale-95"
-                  title="Click to view streak start date"
+                  className={`streak-badge flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full text-xs transition-all cursor-pointer border active:scale-95 ${
+                    isHotStreak
+                      ? 'text-amber-500 dark:text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
+                      : 'text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20'
+                  }`}
+                  title={isHotStreak ? "Hot streak! (>3 days) Click to view streak start date" : "Click to view streak start date"}
                 >
-                  <Flame className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 fill-amber-400/20" />
+                  <div className="relative flex items-center justify-center">
+                    {isHotStreak && (
+                      <div className="absolute inset-0 pointer-events-none flex items-center justify-center" aria-hidden="true">
+                        <span className="absolute w-1 h-1 rounded-full bg-amber-300 flame-spark-1" />
+                        <span className="absolute w-1 h-1 rounded-full bg-orange-400 flame-spark-2" />
+                        <span className="absolute w-1 h-1 rounded-full bg-yellow-200 flame-spark-3" />
+                      </div>
+                    )}
+                    <Flame
+                      className={`w-3.5 h-3.5 ${
+                        isHotStreak
+                          ? 'text-amber-400 fill-amber-400/40 animate-flame-flicker'
+                          : 'text-amber-500 dark:text-amber-400 fill-amber-400/20'
+                      }`}
+                    />
+                  </div>
                   <span>{streakInfo.streak}d</span>
                   <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isStreakExpanded ? 'rotate-180' : ''}`} />
                 </button>
@@ -126,8 +146,27 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-400 pb-1.5 border-b border-slate-200 dark:border-white/10">
-                          <Flame className="w-4 h-4 text-amber-500 dark:text-amber-400 fill-amber-400/20" />
+                          <div className="relative flex items-center justify-center">
+                            {isHotStreak && (
+                              <div className="absolute inset-0 pointer-events-none flex items-center justify-center" aria-hidden="true">
+                                <span className="absolute w-1 h-1 rounded-full bg-amber-300 flame-spark-1" />
+                                <span className="absolute w-1 h-1 rounded-full bg-orange-400 flame-spark-2" />
+                              </div>
+                            )}
+                            <Flame
+                              className={`w-4 h-4 ${
+                                isHotStreak
+                                  ? 'text-amber-400 fill-amber-400/40 animate-flame-flicker'
+                                  : 'text-amber-500 dark:text-amber-400 fill-amber-400/20'
+                              }`}
+                            />
+                          </div>
                           <span>Streak Overview</span>
+                          {isHotStreak && (
+                            <span className="ml-auto text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                              Hot 🔥
+                            </span>
+                          )}
                         </div>
                         <div className="flex justify-between items-center text-slate-600 dark:text-gray-300 pt-0.5">
                           <span className="text-slate-400 dark:text-gray-400">Current Streak:</span>

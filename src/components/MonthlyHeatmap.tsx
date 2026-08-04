@@ -13,7 +13,7 @@ import {
   isToday,
   isFuture,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Sparkles, Plus, Flame } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Sparkles, Plus, Flame, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface MonthlyHeatmapProps {
@@ -185,8 +185,9 @@ export const MonthlyHeatmap: React.FC<MonthlyHeatmapProps> = ({
                     <span className="font-semibold text-white">{completedCount} of {totalHabits} ({Math.round(percentage * 100)}%)</span>
                   </div>
                   {completedCount > 0 && (
-                    <div className="pt-1 text-[11px] text-teal-300 truncate">
-                      ✓ {habits.filter(h => dayCompletions.some(c => c.habitId === h.id)).map(h => h.title).join(', ')}
+                    <div className="pt-1 text-[11px] text-teal-300 truncate flex items-center">
+                      <Check className="w-3 h-3 inline mr-1 shrink-0" />
+                      <span className="truncate">{habits.filter(h => dayCompletions.some(c => c.habitId === h.id)).map(h => h.title).join(', ')}</span>
                     </div>
                   )}
                 </div>

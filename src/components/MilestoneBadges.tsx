@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Habit, CompletionRecord } from '../types';
 import { calculateStreak } from '../utils/dates';
-import { MILESTONES, Milestone } from './MilestoneModal';
+import { MILESTONES, Milestone, renderMilestoneIcon } from './MilestoneModal';
 import { Award, Lock, Sparkles, ChevronRight, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -68,7 +68,7 @@ export function MilestoneBadges({ habits, completions }: MilestoneBadgesProps) {
                   isUnlocked ? 'bg-white/10' : 'bg-slate-200/60 dark:bg-white/5'
                 }`}
               >
-                <span>{m.icon}</span>
+                {renderMilestoneIcon(m.days, "w-5 h-5")}
                 {!isUnlocked && (
                   <div className="absolute inset-0 bg-slate-300/40 dark:bg-black/40 rounded-xl flex items-center justify-center backdrop-blur-[1px]">
                     <Lock className="w-4 h-4 text-slate-500 dark:text-gray-500" />
@@ -110,7 +110,7 @@ export function MilestoneBadges({ habits, completions }: MilestoneBadgesProps) {
                   borderColor: `${selectedMilestone.color}40`,
                 }}
               >
-                {selectedMilestone.icon}
+                {renderMilestoneIcon(selectedMilestone.days, "w-8 h-8")}
               </div>
               <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{selectedMilestone.title}</h4>
               <p className="text-xs text-teal-600 dark:text-cyan-400 font-semibold mb-3">

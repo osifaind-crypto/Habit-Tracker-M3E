@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 
 interface ProgressRingProps {
@@ -20,16 +20,47 @@ export function ProgressRing({
   const circumference = radius * 2 * Math.PI;
   const clampedProgress = Math.min(1, Math.max(0, progress));
   const offset = circumference - clampedProgress * circumference;
+  const isComplete = clampedProgress === 1;
+
+  const [justCompleted, setJustCompleted] = useState(false);
+
+  useEffect(() => {
+    if (isComplete) {
+      setJustCompleted(true);
+      const timer = setTimeout(() => setJustCompleted(false), 900);
+      return () => clearTimeout(timer);
+    }
+  }, [isComplete]);
 
   return (
     <motion.div 
       initial={{ scale: 0.85, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      animate={
+        justCompleted
+          ? { scale: [1, 1.12, 0.98, 1.05, 1], opacity: 1 }
+          : isComplete
+          ? { scale: [1, 1.04, 1], opacity: 1 }
+          : { scale: 1, opacity: 1 }
+      }
+      transition={
+        justCompleted
+          ? { duration: 0.8, ease: 'easeInOut' }
+          : isComplete
+          ? { duration: 2.5, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }
+          : { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+      }
       className="relative flex items-center justify-center flex-shrink-0" 
       style={{ width: size, height: size }}
     >
-      <svg className="transform -rotate-90 w-full h-full overflow-visible">
+      {isComplete && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: [0.25, 0.65, 0.25], scale: [0.92, 1.08, 0.92] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute inset-0 rounded-full bg-gradient-to-r from-teal-500/30 via-cyan-500/30 to-indigo-500/30 blur-md pointer-events-none"
+        />
+      )}
+      <svg className="transform -rotate-90 w-full h-full overflow-visible relative z-10">
         <defs>
           <linearGradient id="geminiProgressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#14b8a6" />
@@ -76,7 +107,7 @@ export function ProgressRing({
         initial={{ opacity: 0, scale: 0.6 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, delay: 0.3, ease: 'easeOut' }}
-        className="absolute flex flex-col items-center justify-center text-center"
+        className="absolute flex flex-col items-center justify-center text-center z-10"
       >
         <span className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tighter">
           {Math.round(clampedProgress * 100)}%

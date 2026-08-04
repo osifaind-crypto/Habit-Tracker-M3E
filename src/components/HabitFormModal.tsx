@@ -33,7 +33,7 @@ export function HabitFormModal({ isOpen, onClose, onSave, initialData }: HabitFo
   const [categories, setCategories] = useState<CategoryDef[]>([]);
   const [isAddingCustomCategory, setIsAddingCustomCategory] = useState(false);
   const [newCatName, setNewCatName] = useState('');
-  const [newCatIcon, setNewCatIcon] = useState('✨');
+  const [newCatIcon, setNewCatIcon] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -70,7 +70,7 @@ export function HabitFormModal({ isOpen, onClose, onSave, initialData }: HabitFo
     if (!newCatName.trim()) return;
     const created = CategoryManager.addCategory({
       name: newCatName.trim(),
-      icon: newCatIcon || '✨',
+      icon: newCatIcon || '',
       color: color,
     });
     setCategories(CategoryManager.getCategories());
@@ -176,7 +176,7 @@ export function HabitFormModal({ isOpen, onClose, onSave, initialData }: HabitFo
                     <div className="flex items-center gap-2">
                       <input
                         type="text"
-                        placeholder="Emoji (e.g. 🎯)"
+                        placeholder="Tag (optional)"
                         value={newCatIcon}
                         onChange={e => setNewCatIcon(e.target.value)}
                         className="w-16 bg-white dark:bg-[#13151b] border border-slate-200 dark:border-white/10 rounded-xl px-2 py-1.5 text-center text-sm text-slate-900 dark:text-white focus:outline-none"

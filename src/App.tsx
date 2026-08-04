@@ -414,7 +414,7 @@ export default function App() {
                     <Target className="w-3.5 h-3.5" /> Daily Focus
                   </span>
                   <h3 className="text-xl font-bold tracking-tight mb-1">
-                    {progress === 1 ? '🎉 All Tasks Complete!' : `${todayCompletions} of ${data.habits.length} Tasks Done`}
+                    {progress === 1 ? 'All Tasks Complete!' : `${todayCompletions} of ${data.habits.length} Tasks Done`}
                   </h3>
                   <p className="text-slate-500 dark:text-gray-400 text-sm leading-relaxed mb-3">
                     {data.habits.length === 0

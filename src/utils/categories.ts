@@ -6,13 +6,13 @@ export interface CategoryDef {
 }
 
 export const DEFAULT_CATEGORIES: CategoryDef[] = [
-  { id: 'health', name: 'Health', icon: '❤️', color: '#10b981' },
-  { id: 'fitness', name: 'Fitness', icon: '🏋️', color: '#ef4444' },
-  { id: 'learning', name: 'Learning', icon: '📚', color: '#8b5cf6' },
-  { id: 'productivity', name: 'Productivity', icon: '⚡', color: '#0ea5e9' },
-  { id: 'mindfulness', name: 'Mindfulness', icon: '🧘', color: '#ec4899' },
-  { id: 'finance', name: 'Finance', icon: '💰', color: '#f59e0b' },
-  { id: 'personal', name: 'Personal', icon: '👤', color: '#6366f1' },
+  { id: 'health', name: 'Health', icon: '', color: '#10b981' },
+  { id: 'fitness', name: 'Fitness', icon: '', color: '#ef4444' },
+  { id: 'learning', name: 'Learning', icon: '', color: '#8b5cf6' },
+  { id: 'productivity', name: 'Productivity', icon: '', color: '#0ea5e9' },
+  { id: 'mindfulness', name: 'Mindfulness', icon: '', color: '#ec4899' },
+  { id: 'finance', name: 'Finance', icon: '', color: '#f59e0b' },
+  { id: 'personal', name: 'Personal', icon: '', color: '#6366f1' },
 ];
 
 const CUSTOM_CATEGORIES_KEY = 'habit-tracker-custom-categories';
@@ -55,7 +55,7 @@ export class CategoryManager {
     return found || {
       id: 'other',
       name: name || 'General',
-      icon: '📌',
+      icon: '',
       color: '#8b5cf6',
     };
   }
