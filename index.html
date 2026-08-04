@@ -249,11 +249,12 @@
     function ProgressRing({ progress, size = 140, strokeWidth = 12 }) {
       const radius = (size - strokeWidth) / 2;
       const circumference = radius * 2 * Math.PI;
-      const offset = circumference - progress * circumference;
+      const clampedProgress = Math.min(1, Math.max(0, progress));
+      const offset = circumference - clampedProgress * circumference;
 
       return (
-        <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-          <svg className="transform -rotate-90 w-full h-full">
+        <div className="relative flex items-center justify-center flex-shrink-0 animate-scale-up" style={{ width: size, height: size }}>
+          <svg className="transform -rotate-90 w-full h-full overflow-visible">
             <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#1c1f26" strokeWidth={strokeWidth} />
             <circle
               cx={size / 2}
@@ -265,12 +266,17 @@
               strokeDasharray={circumference}
               strokeDashoffset={offset}
               strokeLinecap="round"
-              className="transition-all duration-700 ease-out drop-shadow-md"
+              className="transition-all duration-1000 ease-out drop-shadow-md"
+              style={{
+                transitionProperty: 'stroke-dashoffset',
+                transitionDuration: '1.4s',
+                transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)'
+              }}
             />
           </svg>
-          <div className="absolute flex flex-col items-center justify-center">
+          <div className="absolute flex flex-col items-center justify-center text-center animate-fade-in">
             <span className="text-3xl font-bold text-white tracking-tighter">
-              {Math.round(progress * 100)}%
+              {Math.round(clampedProgress * 100)}%
             </span>
           </div>
         </div>
@@ -1330,6 +1336,16 @@
             setActiveMilestone({ milestone: matched, habitTitle: targetHabit.title });
           }
 
+          if (targetDate === todayStr) {
+            const total = data.habits.length;
+            const current = data.habits.filter(h => updatedCompletions.some(c => c.habitId === h.id && c.date === todayStr)).length;
+            if (current === total && total > 0 && !matched && typeof confetti === 'function') {
+              confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+          }
+        }
+      };
+
       const renderSummaryWidget = (id) => {
         switch (id) {
           case 'metrics':
@@ -1364,7 +1380,6 @@
           default:
             return null;
         }
-      };
       };
 
       const handleToggleCompletion = (habitId) => {
