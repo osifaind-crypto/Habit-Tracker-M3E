@@ -310,7 +310,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#07090e] text-slate-900 dark:text-slate-100 pb-32 transition-colors duration-300 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#07090e] text-slate-900 dark:text-slate-100 pb-40 transition-colors duration-300 relative">
       {/* Liquid Ambient Organic Background Blobs with Motion Parallax */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden" aria-hidden="true">
         <motion.div
@@ -616,21 +616,21 @@ export default function App() {
       </main>
 
       {/* Floating Pill-Shaped Bottom Navigation Bar */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[92vw]">
-        <nav className="bg-white/90 dark:bg-[#121824]/95 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 p-1.5 rounded-full shadow-lg flex items-center gap-1">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] max-w-[94vw] pointer-events-auto">
+        <nav className="gemini-pill-nav bg-white/90 dark:bg-[#121826]/95 backdrop-blur-2xl border border-slate-200/80 dark:border-white/15 p-2 rounded-full shadow-2xl flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={() => setActiveTab('tasks')}
-            className={`flex items-center gap-2 py-2 px-3.5 rounded-full text-xs font-medium transition-all ${
+            className={`flex items-center gap-2 py-2 px-4 rounded-full text-xs font-semibold transition-all ${
               activeTab === 'tasks'
-                ? 'bg-teal-500/15 text-teal-700 dark:text-cyan-300 font-semibold'
-                : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
+                ? 'bg-sky-500/15 text-sky-600 dark:text-sky-300 font-bold border border-sky-400/30'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10'
             }`}
           >
             <CheckCircle2 className="w-4 h-4" />
             <span>Tasks</span>
             {data.habits.length > 0 && (
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                activeTab === 'tasks' ? 'bg-teal-500/20 text-teal-700 dark:text-cyan-300' : 'bg-slate-200 dark:bg-[#1c1f26] text-slate-600 dark:text-gray-400'
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                activeTab === 'tasks' ? 'bg-sky-500/20 text-sky-600 dark:text-sky-200' : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-300'
               }`}>
                 {todayCompletions}/{data.habits.length}
               </span>
@@ -639,27 +639,27 @@ export default function App() {
 
           <button
             onClick={() => setActiveTab('summaries')}
-            className={`flex items-center gap-2 py-2 px-3.5 rounded-full text-xs font-medium transition-all ${
+            className={`flex items-center gap-2 py-2 px-4 rounded-full text-xs font-semibold transition-all ${
               activeTab === 'summaries'
-                ? 'bg-teal-500/15 text-teal-700 dark:text-cyan-300 font-semibold'
-                : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
+                ? 'bg-purple-500/15 text-purple-600 dark:text-purple-300 font-bold border border-purple-400/30'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10'
             }`}
           >
             <BarChart3 className="w-4 h-4" />
             <span>Summaries</span>
           </button>
 
-          <div className="h-4 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
+          <div className="h-4 w-px bg-slate-200 dark:bg-white/15 mx-0.5" />
 
           <button
             onClick={() => handleOpenForm()}
-            className={`flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs shadow-sm active:scale-95 transition-all m3-fab-morph ${
-              isScrolled ? 'is-scrolled px-3 py-2.5' : 'px-3.5 py-2'
+            className={`flex items-center gap-1.5 bg-gradient-to-r from-sky-400 to-indigo-500 text-slate-950 font-extrabold text-xs shadow-lg active:scale-95 transition-all rounded-full ${
+              isScrolled ? 'px-3 py-2.5' : 'px-4 py-2'
             }`}
             title="Create new habit"
           >
-            <Plus className="w-4 h-4" />
-            <span className={isScrolled ? 'hidden' : 'hidden sm:inline'}>Add</span>
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span className={isScrolled ? 'hidden' : 'hidden sm:inline'}>Add Habit</span>
           </button>
         </nav>
       </div>
