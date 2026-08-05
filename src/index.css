@@ -127,7 +127,7 @@ html, body {
   background: linear-gradient(135deg, #38bdf8 0%, #0284c7 50%, #8b5cf6 100%) !important;
   color: #030712 !important;
   box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35) !important;
-  animation: organicBloom 400ms cubic-bezier(0.34, 1.56, 0.64, 1) !forward;
+  animation: organicBloom 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 @keyframes organicBloom {
