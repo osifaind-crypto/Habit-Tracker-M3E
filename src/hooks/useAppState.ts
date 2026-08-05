@@ -48,7 +48,9 @@ export const useAppState = () => {
   const addHabit = (habit: Omit<Habit, 'id' | 'createdAt'>) => {
     const newHabit: Habit = {
       ...habit,
-      id: crypto.randomUUID(),
+      id: typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' 
+        ? crypto.randomUUID() 
+        : 'h_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 9),
       createdAt: Date.now(),
     };
     setData(prev => ({ ...prev, habits: [...prev.habits, newHabit] }));
