@@ -15,7 +15,7 @@ import { HistoricalLogModal } from './components/HistoricalLogModal';
 import { DailyMotivation } from './components/DailyMotivation';
 import { Habit, CompletionRecord } from './types';
 import { Plus, Settings, Sparkles, CheckCircle2, BarChart3, Flame, Target, TrendingUp, Sun, Moon, GripVertical, Eye, EyeOff, SlidersHorizontal, ArrowUp, ArrowDown, RotateCcw, Check } from 'lucide-react';
-import { motion, AnimatePresence, Reorder, useDragControls } from 'motion/react';
+import { motion, AnimatePresence, Reorder, useDragControls, useScroll, useTransform } from 'motion/react';
 import { format } from 'date-fns';
 
 type ViewMode = 'tasks' | 'summaries';
@@ -97,6 +97,12 @@ export default function App() {
   }, [summarySections]);
 
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Motion parallax for ambient liquid background blobs
+  const { scrollY } = useScroll();
+  const blobY1 = useTransform(scrollY, [0, 1200], [0, -150]);
+  const blobY2 = useTransform(scrollY, [0, 1200], [0, -80]);
+  const blobY3 = useTransform(scrollY, [0, 1200], [0, -210]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -304,9 +310,22 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 pb-32 transition-colors duration-300 relative overflow-hidden">
-      {/* Subtle Ambient Wash */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-80 bg-gradient-to-b from-teal-500/10 via-cyan-500/5 to-transparent blur-3xl pointer-events-none -z-10 animate-gemini-glow" />
+    <div className="min-h-screen bg-slate-50 dark:bg-[#07090e] text-slate-900 dark:text-slate-100 pb-32 transition-colors duration-300 relative overflow-hidden">
+      {/* Liquid Ambient Organic Background Blobs with Motion Parallax */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden" aria-hidden="true">
+        <motion.div
+          style={{ y: blobY1 }}
+          className="absolute -top-32 left-1/2 -translate-x-1/2 w-[750px] h-[750px] rounded-full bg-sky-500/10 dark:bg-sky-500/12 blur-[130px] pointer-events-none"
+        />
+        <motion.div
+          style={{ y: blobY2 }}
+          className="absolute top-1/3 -right-40 w-[650px] h-[650px] rounded-full bg-purple-600/10 dark:bg-purple-600/12 blur-[140px] pointer-events-none"
+        />
+        <motion.div
+          style={{ y: blobY3 }}
+          className="absolute bottom-10 -left-40 w-[650px] h-[650px] rounded-full bg-teal-500/10 dark:bg-teal-500/10 blur-[130px] pointer-events-none"
+        />
+      </div>
 
       {/* Header */}
       <header className="px-6 pt-8 pb-4">
