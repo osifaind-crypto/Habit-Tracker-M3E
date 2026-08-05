@@ -15,6 +15,26 @@ interface HabitCardProps {
   dragControls?: DragControls;
 }
 
+function getRgbaColor(colorStr: string | undefined, opacity: number): string {
+  if (!colorStr) return `rgba(56, 189, 248, ${opacity})`;
+  if (colorStr.startsWith('#')) {
+    let hex = colorStr.replace('#', '');
+    if (hex.length === 3) {
+      hex = hex.split('').map(c => c + c).join('');
+    }
+    if (hex.length === 6) {
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+  }
+  if (colorStr.startsWith('rgb')) {
+    return colorStr;
+  }
+  return `rgba(56, 189, 248, ${opacity})`;
+}
+
 export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, dragControls }: HabitCardProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [isStreakExpanded, setIsStreakExpanded] = useState(false);
@@ -24,14 +44,16 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
   const consistencyScore = calculateConsistencyScore(habit, completions);
   const categoryDef = CategoryManager.getCategoryByName(habit.category);
 
+  // Safe color formatter for CSS box-shadow and border strings
+  const activeColorGlow = getRgbaColor(habit.color, 0.25);
+  const activeColorBorder = getRgbaColor(habit.color, 0.4);
+
   // Motion parallax & 3D tilt values for glass surface depth effect
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const rotateX = useSpring(useTransform(mouseY, [-60, 60], [4, -4]), { stiffness: 280, damping: 22 });
-  const rotateY = useSpring(useTransform(mouseX, [-150, 150], [-5, 5]), { stiffness: 280, damping: 22 });
-  const moveX = useSpring(useTransform(mouseX, [-150, 150], [-3, 3]), { stiffness: 280, damping: 22 });
-  const moveY = useSpring(useTransform(mouseY, [-60, 60], [-3, 3]), { stiffness: 280, damping: 22 });
+  const rotateX = useSpring(useTransform(mouseY, [-60, 60], [3, -3]), { stiffness: 280, damping: 22 });
+  const rotateY = useSpring(useTransform(mouseX, [-150, 150], [-4, 4]), { stiffness: 280, damping: 22 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -59,26 +81,19 @@ export function HabitCard({ habit, completions, onToggle, onEdit, onDelete, drag
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{
-        scale: 1.015,
-        zIndex: 25,
-        boxShadow: completed
-          ? `0 24px 48px -12px ${habit.color || '#38bdf8'}40, 0 0 28px ${habit.color || '#38bdf8'}30`
-          : '0 24px 48px -12px rgba(0, 0, 0, 0.75), 0 0 20px rgba(56, 189, 248, 0.12)',
+        scale: 1.01,
+        zIndex: 20,
       }}
-      className={`relative p-4 sm:p-5 flex items-center gap-3 sm:gap-4 m3-card-press m3-habit-card ${
+      className={`relative p-4 sm:p-5 flex items-center gap-3 sm:gap-4 m3-card-press m3-habit-card transition-shadow duration-300 ${
         completed
           ? 'is-completed m3-active-card m3-primary-container'
           : 'm3-card-asymmetric m3-secondary-container m3-idle-state'
       }`}
       style={{
-        perspective: 1000,
         rotateX,
         rotateY,
-        x: moveX,
-        y: moveY,
-        transformStyle: 'preserve-3d',
-        boxShadow: completed ? `0 0 18px -4px ${habit.color || '#00f2fe'}35` : undefined,
-        border: `1px solid ${completed ? `${habit.color || '#00f2fe'}60` : 'rgba(255, 255, 255, 0.08)'}`,
+        boxShadow: completed ? `0 0 18px -4px ${activeColorGlow}` : undefined,
+        border: `1px solid ${completed ? activeColorBorder : 'rgba(255, 255, 255, 0.08)'}`,
       }}
     >
       {dragControls && (

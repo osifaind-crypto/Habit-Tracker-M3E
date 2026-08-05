@@ -57,7 +57,7 @@ function HabitListItem({
       dragControls={dragControls}
       dragListener={false}
       className="relative select-none"
-      whileDrag={{ scale: 1.02, zIndex: 50, shadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)' }}
+      whileDrag={{ scale: 1.02, zIndex: 50, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)' }}
     >
       <HabitCard
         habit={habit}
